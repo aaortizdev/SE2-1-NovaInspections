@@ -1,0 +1,13 @@
+# Entorno virtual y archivos generados por Python
+backend/.venv/
+__pycache__/
+*.pyc
+
+# Dependencias y archivos generados por el frontend
+frontend/node_modules/
+frontend/dist/
+
+# Variables de entorno locales
+.env
+.env.*
+!.env.example
