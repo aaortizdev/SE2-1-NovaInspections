@@ -272,9 +272,38 @@ function App() {
                         {archivo.type === 'application/pdf' ? 'PDF' : 'IMG'}
                       </div>
 
-                      <div className="file-information">
+                      <div
+                        className="file-information"
+                        style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}
+                      >
                         <strong>{archivo.name}</strong>
                         <span>Etiqueta cargada</span>
+
+                        {!mensajeAnalisis.includes('Pendiente IA') && (
+                          <label
+                            className="upload-button"
+                            style={{
+                              padding: '6px 10px',
+                              fontSize: '11px',
+                              width: 'fit-content',
+                              marginTop: '4px',
+                            }}
+                          >
+                            Cambiar archivo
+                            <input
+                              type="file"
+                              accept=".pdf,.png,.jpg"
+                              onChange={(evento) => {
+                                manejarArchivo(evento)
+                                setMensajeAnalisis('')
+                                setAceptoTerminos(false)
+                                setNormativa('')
+                                setMostrarConfirmacionBorrado(false)
+                              }}
+                              hidden
+                            />
+                          </label>
+                        )}
                       </div>
 
                       <button
