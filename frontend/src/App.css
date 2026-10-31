@@ -603,3 +603,73 @@ body.resizing .pdf-preview {
   right: auto;
   left: 3px;
 }
+
+/* --- Estilos para la confirmación de borrado --- */
+
+.blur-effect {
+  filter: blur(3px);
+  opacity: 0.5;
+  pointer-events: none; /* Bloquea clics en la tarjeta mientras está borrosa */
+  transition: filter 0.2s, opacity 0.2s;
+}
+
+.confirm-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(245, 248, 251, 0.7); /* Fondo semi-transparente del color de la tarjeta */
+  border-radius: 18px;
+  z-index: 10;
+  padding: 10px 15px;
+  text-align: center;
+}
+
+.confirm-overlay p {
+  color: #0b1c35;
+  font-size: 13px;
+  font-weight: 700;
+  margin: 0 0 12px 0;
+  line-height: 1.3;
+}
+
+.confirm-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.btn-cancelar {
+  background-color: #00c9ad;
+  color: #0b1b32;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 10px; /* Bordes suaves */
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.1s;
+}
+
+.btn-cancelar:hover {
+  background-color: #00dfc0;
+}
+
+.btn-continuar {
+  background-color: #e2e8f0;
+  color: #526d8d;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 10px; /* Bordes suaves */
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn-continuar:hover {
+  background-color: #cbd5e1;
+}

@@ -9,6 +9,7 @@ function App() {
   const [normativa, setNormativa] = useState('')
   const [aceptoTerminos, setAceptoTerminos] = useState(false)
   const [mensajeAnalisis, setMensajeAnalisis] = useState('')
+  const [mostrarConfirmacionBorrado, setMostrarConfirmacionBorrado] = useState(false)
 
   const [anchoIzquierdo, setAnchoIzquierdo] = useState(350)
   const [anchoDerecho, setAnchoDerecho] = useState(390)
@@ -111,9 +112,25 @@ function App() {
     }
   }
 
-  function quitarArchivo() {
+  function intentarQuitarArchivo() {
+    if (mensajeAnalisis.includes('Pendiente IA')) {
+      setMostrarConfirmacionBorrado(true)
+      return
+    }
+    ejecutarBorrado()
+  }
+
+  function ejecutarBorrado() {
     setArchivo(null)
     setError('')
+    setMensajeAnalisis('')
+    setAceptoTerminos(false)
+    setNormativa('')
+    setMostrarConfirmacionBorrado(false)
+  }
+
+  function cancelarBorrado() {
+    setMostrarConfirmacionBorrado(false)
   }
 
   async function enviarEvaluacion() {
@@ -249,24 +266,40 @@ function App() {
                 </label>
               ) : (
                 <>
-                  <div className="file-card">
-                    <div className="file-icon">
-                      {archivo.type === 'application/pdf' ? 'PDF' : 'IMG'}
+                  <div className="file-card-container" style={{ position: 'relative' }}>
+                    <div className={`file-card ${mostrarConfirmacionBorrado ? 'blur-effect' : ''}`}>
+                      <div className="file-icon">
+                        {archivo.type === 'application/pdf' ? 'PDF' : 'IMG'}
+                      </div>
+
+                      <div className="file-information">
+                        <strong>{archivo.name}</strong>
+                        <span>Etiqueta cargada</span>
+                      </div>
+
+                      <button
+                        type="button"
+                        className="remove-file"
+                        onClick={intentarQuitarArchivo}
+                        aria-label="Quitar archivo"
+                      >
+                        ×
+                      </button>
                     </div>
 
-                    <div className="file-information">
-                      <strong>{archivo.name}</strong>
-                      <span>Etiqueta cargada</span>
-                    </div>
-
-                    <button
-                      type="button"
-                      className="remove-file"
-                      onClick={quitarArchivo}
-                      aria-label="Quitar archivo"
-                    >
-                      ×
-                    </button>
+                    {mostrarConfirmacionBorrado && (
+                      <div className="confirm-overlay">
+                        <p>¿Seguro que deseas cancelar el proceso?</p>
+                        <div className="confirm-actions">
+                          <button type="button" className="btn-cancelar" onClick={cancelarBorrado}>
+                            Cancelar
+                          </button>
+                          <button type="button" className="btn-continuar" onClick={ejecutarBorrado}>
+                            Continuar
+                          </button>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </>
               )}
@@ -329,41 +362,50 @@ function App() {
               )}
 
               <div className="consent-section">
-                <label className="consent-label">
-                  <input
-                    type="checkbox"
-                    checked={aceptoTerminos}
-                    onChange={(evento) => {
-                      setAceptoTerminos(evento.target.checked)
-                      setMensajeAnalisis('')
-                    }}
-                  />
+                {!mensajeAnalisis.includes('Pendiente IA') ? (
+                  <>
+                    <label className="consent-label">
+                      <input
+                        type="checkbox"
+                        checked={aceptoTerminos}
+                        onChange={(evento) => {
+                          setAceptoTerminos(evento.target.checked)
+                          setMensajeAnalisis('')
+                        }}
+                      />
+                      <span>
+                        He leído y acepto los{' '}
+                        <a
+                          href={`${import.meta.env.BASE_URL}terminos.html`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          términos y condiciones
+                        </a>
+                        . Entiendo que los resultados son informativos y no constituyen una
+                        certificación legal.
+                      </span>
+                    </label>
 
-                  <span>
-                    He leído y acepto los{' '}
-                    <a
-                      href={`${import.meta.env.BASE_URL}terminos.html`}
-                      target="_blank"
-                      rel="noopener noreferrer"
+                    <button
+                      type="button"
+                      className="analyze-button"
+                      disabled={!archivo || !normativa || !aceptoTerminos}
+                      onClick={enviarEvaluacion}
                     >
-                      términos y condiciones
-                    </a>
-                    . Entiendo que los resultados son informativos y no constituyen una
-                    certificación legal.
-                  </span>
-                </label>
+                      Analizar etiqueta
+                    </button>
 
-                <button
-                  type="button"
-                  className="analyze-button"
-                  disabled={!archivo || !normativa || !aceptoTerminos}
-                  onClick={enviarEvaluacion}
-                >
-                  Analizar etiqueta
-                </button>
-
-                {mensajeAnalisis && (
-                  <p className="analysis-message" role="status">
+                    {/* Mostramos errores previos al envío exitoso aquí si existen */}
+                    {mensajeAnalisis && !mensajeAnalisis.includes('Pendiente IA') && (
+                      <p className="analysis-message" style={{ color: '#dc3545' }} role="status">
+                        {mensajeAnalisis}
+                      </p>
+                    )}
+                  </>
+                ) : (
+                  /* Vista cuando el análisis ya está en curso */
+                  <p className="analysis-message" style={{ color: '#009b88', fontWeight: 'bold', marginTop: 0 }} role="status">
                     {mensajeAnalisis}
                   </p>
                 )}
