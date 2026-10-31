@@ -3,13 +3,26 @@
 }
 
 .header {
-  height: 70px;
+  height: 56px;
   background-color: #0b1b32;
   color: #fff;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 28px;
+  padding: 0 20px;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.brand-icon {
+  display: block;
+  height: 36px;
+  width: auto;
+  margin-right: 2px; /* acerca el logo al texto */
 }
 
 .logo {
@@ -19,26 +32,35 @@
 }
 
 .logo-name {
-  font-size: 24px;
-  font-weight: 800;
+  font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+  font-size: 20px;
+  font-weight: 700;   /* antes: 800 */
+  letter-spacing: -0.03em;
 }
 
+/* Punto verde: círculo que se apoya en la línea base del texto */
 .logo-dot {
-  color: #00c9ad;
+  display: inline-block;
+  width: 0.2em;
+  height: 0.2em;
+  margin-left: 0.06em;
+  border-radius: 50%;
+  background-color: #00c9ad;
 }
 
 .logo-subtitle {
-  margin-top: 3px;
-  padding-right: 5px;
+  margin-top: 1px;
+  padding-right: 6px;
   font-size: 10px;
-  font-weight: 700;
+  font-weight: 600;   /* antes: 700 */
+  letter-spacing: 0.02em;
   text-align: right;
 }
 
 .header-actions {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
 }
 
 .language,
@@ -46,26 +68,49 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 42px;
+  height: 34px;
+  border: 0;
   border-radius: 50px;
+  transition: background-color 0.15s, transform 0.15s;
 }
 
 .language {
-  padding: 0 14px;
+  gap: 8px;
+  padding: 0 14px 0 10px;
   background-color: #172c49;
   color: #c3d0df;
-  font-size: 13px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.language:hover {
+  background-color: #1f3a5c;
+}
+
+.flag {
+  width: 20px;
+  height: 14px;
+  border-radius: 3px;
+  box-shadow: 0 0 0 1px #ffffff1f;
 }
 
 .user-icon {
-  width: 42px;
+  width: 34px;
   background-color: #00c9ad;
+  color: #0b1b32;
+}
+
+.user-icon:hover {
+  background-color: #00dfc0;
+  transform: scale(1.05);
 }
 
 .workspace {
   display: grid;
-  grid-template-columns: 95px 350px minmax(300px, 1fr) 390px;
-  min-height: calc(100vh - 70px);
+  /* Las columnas se definen desde React (inline style). */
+  height: calc(100vh - 56px);
+  min-height: 0;
 }
 
 .sidebar {
@@ -74,14 +119,14 @@
 }
 
 .sidebar-item {
-  min-height: 110px;
+  min-height: 72px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 10px;
-  padding: 10px;
-  font-size: 12px;
+  gap: 6px;
+  padding: 8px;
+  font-size: 10px;
   text-align: center;
 }
 
@@ -92,29 +137,15 @@
 }
 
 .sidebar-icon {
-  font-size: 26px;
+  font-size: 20px;
 }
 
 .left-panel,
 .right-panel {
   background-color: #fff;
-  padding: 24px 20px;
-}
-
-.left-panel {
-  border-right: 1px solid #e3eaf2;
-}
-
-.right-panel {
-  border-left: 1px solid #e3eaf2;
-}
-
-.step {
-  margin: 0 0 10px;
-  color: #8fa3bd;
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 2px;
+  padding: 20px 18px;
+  min-width: 0;
+  overflow-y: auto;
 }
 
 .left-panel h2,
@@ -145,6 +176,7 @@
   min-height: 55px;
   display: flex;
   align-items: center;
+  justify-content: space-between;
   padding: 0 20px;
   background-color: #101010;
   color: #d9e2ee;
@@ -458,4 +490,116 @@
   margin: 12px 0 0;
   color: #526d8d;
   font-size: 13px;
+}
+
+/* Divisores: línea de 1 px con zona de agarre más ancha */
+.resizer {
+  position: relative;
+  z-index: 5;
+  width: 1px;
+  cursor: col-resize;
+  background-color: #e3eaf2;
+  transition: background-color 0.15s;
+  touch-action: none;
+}
+
+.resizer::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: -4px;
+  right: -4px;
+}
+
+.resizer:hover,
+body.resizing .resizer {
+  background-color: #00c9ad;
+}
+
+body.resizing {
+  cursor: col-resize;
+  user-select: none;
+}
+
+/* El iframe del PDF captura el mouse y corta el arrastre */
+body.resizing .pdf-preview {
+  pointer-events: none;
+}
+
+/* Encabezado de los paneles claros */
+.panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.panel-header h2 {
+  margin: 0;
+}
+
+.viewer-toolbar-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+/* Botón de ocultar/mostrar (versión clara, dentro de los paneles) */
+.panel-toggle {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: 1px solid #dce5ef;
+  border-radius: 9px;
+  background-color: transparent;
+  color: #526d8d;
+  transition: background-color 0.15s, border-color 0.15s, color 0.15s;
+}
+
+.panel-toggle:hover {
+  background-color: #f8fffd;
+  border-color: #00bfa5;
+  color: #00bfa5;
+}
+
+/* Versión oscura, dentro de la barra del visor */
+.viewer-toolbar .panel-toggle {
+  border-color: #2a3a52;
+  color: #c3d0df;
+}
+
+.viewer-toolbar .panel-toggle:hover {
+  background-color: #172c49;
+  border-color: #00c9ad;
+  color: #00c9ad;
+}
+
+/* Ícono: rectángulo con barra a la derecha (o a la izquierda con .left) */
+.panel-toggle-icon {
+  position: relative;
+  width: 18px;
+  height: 14px;
+  border: 2px solid currentColor;
+  border-radius: 3px;
+}
+
+.panel-toggle-icon::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 3px;
+  bottom: 0;
+  width: 2px;
+  background-color: currentColor;
+}
+
+.panel-toggle-icon.left::after {
+  right: auto;
+  left: 3px;
 }
