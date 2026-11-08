@@ -2,10 +2,12 @@ import { useEffect, useState } from 'react'
 import type { ChangeEvent, DragEvent, PointerEvent as ReactPointerEvent } from 'react'
 import { Document, Page, pdfjs } from 'react-pdf'
 import { TransformComponent, TransformWrapper } from 'react-zoom-pan-pinch'
-import { Toaster } from 'sonner'                          
+import { Toaster, toast } from 'sonner'                          
 import 'react-pdf/dist/Page/AnnotationLayer.css'
 import 'react-pdf/dist/Page/TextLayer.css'
 import './App.css'
+
+const TAMANO_MAXIMO_BYTES = 15 * 1024 * 1024
 
 pdfjs.GlobalWorkerOptions.workerSrc = new URL(
   'pdfjs-dist/build/pdf.worker.min.mjs',
@@ -18,7 +20,6 @@ function App() {
   const [zoomPorcentaje, setZoomPorcentaje] = useState(100)
   const [numPagesPDF, setNumPagesPDF] = useState(1)
   const [paginaActual, setPaginaActual] = useState(1)
-  const [error, setError] = useState('')
   const [normativa, setNormativa] = useState('')
   const [aceptoTerminos, setAceptoTerminos] = useState(false)
   const [mensajeAnalisis, setMensajeAnalisis] = useState('')
@@ -94,11 +95,16 @@ function App() {
     ]
 
     if (!tiposPermitidos.includes(archivoSeleccionado.type)) {
-      setError('Formato no permitido. Selecciona un archivo PDF, PNG o JPG.')
+      toast.error('Formato no permitido. Selecciona un archivo PDF, PNG o JPG.')
       return
     }
 
-    setError('')
+    if (archivoSeleccionado.size > TAMANO_MAXIMO_BYTES) {
+      toast.error('El archivo no puede superar los 15 MB.')
+      return
+    }
+
+    setZoomPorcentaje(100)
     setZoomPorcentaje(100)
     setNumPagesPDF(1)
     setPaginaActual(1)
@@ -141,7 +147,6 @@ function App() {
     setZoomPorcentaje(100)
     setNumPagesPDF(1)
     setPaginaActual(1)
-    setError('')
     setMensajeAnalisis('')
     setAceptoTerminos(false)
     setNormativa('')
@@ -365,8 +370,6 @@ function App() {
                   </div>
                 </>
               )}
-
-              {error && <p className="file-error">{error}</p>}
 
               <div className="regulation-section">
                 <label htmlFor="normativa" className="section-label">
@@ -603,7 +606,7 @@ function App() {
                           setNumPagesPDF(numPages)
                           setPaginaActual((pagina) => Math.min(pagina, numPages))
                         }}
-                        onLoadError={(pdfError) => setError(`No se pudo cargar el PDF: ${pdfError.message}`)}
+                        onLoadError={() => toast.error('No se pudo cargar el PDF. Es posible que el archivo esté dañado.')}
                       >
                         <Page
                           key={`pagina-${paginaActual}`}
