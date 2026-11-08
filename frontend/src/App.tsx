@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import type { ChangeEvent, DragEvent, PointerEvent as ReactPointerEvent } from 'react'
 import { Document, Page, pdfjs } from 'react-pdf'
 import { TransformComponent, TransformWrapper } from 'react-zoom-pan-pinch'
+import { Toaster } from 'sonner'                          
 import 'react-pdf/dist/Page/AnnotationLayer.css'
 import 'react-pdf/dist/Page/TextLayer.css'
 import './App.css'
@@ -200,6 +201,7 @@ function App() {
 
   return (
     <div className="app">
+      <Toaster position="top-right" richColors closeButton /> 
       <header className="header">
         <div className="brand">
           <img
