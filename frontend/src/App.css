@@ -251,6 +251,13 @@
   text-align: right;
 }
 
+.page-level {
+  min-width: max-content;
+  color: #c3d0df;
+  font-size: 12px;
+  letter-spacing: normal;
+}
+
 .pdf-page {
   margin: 0 auto 16px;
   background-color: #fff;

@@ -16,6 +16,7 @@ function App() {
   const [urlArchivo, setUrlArchivo] = useState<string | null>(null)
   const [zoomPorcentaje, setZoomPorcentaje] = useState(100)
   const [numPagesPDF, setNumPagesPDF] = useState(1)
+  const [paginaActual, setPaginaActual] = useState(1)
   const [error, setError] = useState('')
   const [normativa, setNormativa] = useState('')
   const [aceptoTerminos, setAceptoTerminos] = useState(false)
@@ -99,6 +100,7 @@ function App() {
     setError('')
     setZoomPorcentaje(100)
     setNumPagesPDF(1)
+    setPaginaActual(1)
     setArchivo(archivoSeleccionado)
   }
 
@@ -137,6 +139,7 @@ function App() {
     setArchivo(null)
     setZoomPorcentaje(100)
     setNumPagesPDF(1)
+    setPaginaActual(1)
     setError('')
     setMensajeAnalisis('')
     setAceptoTerminos(false)
@@ -532,6 +535,37 @@ function App() {
                     >
                       FIT
                     </button>
+                    {archivo?.type === 'application/pdf' && (
+                      <>
+                        <button
+                          type="button"
+                          className="toolbar-btn"
+                          onClick={() => {
+                            setPaginaActual((pagina) => Math.max(1, pagina - 1))
+                            resetTransform()
+                          }}
+                          disabled={paginaActual === 1}
+                          aria-label="Página anterior"
+                        >
+                          Anterior
+                        </button>
+                        <span className="page-level">
+                          Pág. {paginaActual} de {numPagesPDF}
+                        </span>
+                        <button
+                          type="button"
+                          className="toolbar-btn"
+                          onClick={() => {
+                            setPaginaActual((pagina) => Math.min(numPagesPDF, pagina + 1))
+                            resetTransform()
+                          }}
+                          disabled={paginaActual === numPagesPDF}
+                          aria-label="Página siguiente"
+                        >
+                          Siguiente
+                        </button>
+                      </>
+                    )}
                     <span className="zoom-level">{zoomPorcentaje}%</span>
                   </div>
 
@@ -563,18 +597,19 @@ function App() {
                     {archivo && urlArchivo && archivo.type === 'application/pdf' && (
                       <Document
                         file={urlArchivo}
-                        onLoadSuccess={({ numPages }) => setNumPagesPDF(numPages)}
+                        onLoadSuccess={({ numPages }) => {
+                          setNumPagesPDF(numPages)
+                          setPaginaActual((pagina) => Math.min(pagina, numPages))
+                        }}
                         onLoadError={(pdfError) => setError(`No se pudo cargar el PDF: ${pdfError.message}`)}
                       >
-                        {Array.from({ length: numPagesPDF }, (_, index) => (
-                          <Page
-                            key={`pagina-${index + 1}`}
-                            className="pdf-page"
-                            pageNumber={index + 1}
-                            renderTextLayer={false}
-                            renderAnnotationLayer={false}
-                          />
-                        ))}
+                        <Page
+                          key={`pagina-${paginaActual}`}
+                          className="pdf-page"
+                          pageNumber={paginaActual}
+                          renderTextLayer={false}
+                          renderAnnotationLayer={false}
+                        />
                       </Document>
                     )}
                   </TransformComponent>
