@@ -1,10 +1,21 @@
 import { useEffect, useState } from 'react'
 import type { ChangeEvent, DragEvent, PointerEvent as ReactPointerEvent } from 'react'
+import { Document, Page, pdfjs } from 'react-pdf'
+import { TransformComponent, TransformWrapper } from 'react-zoom-pan-pinch'
+import 'react-pdf/dist/Page/AnnotationLayer.css'
+import 'react-pdf/dist/Page/TextLayer.css'
 import './App.css'
+
+pdfjs.GlobalWorkerOptions.workerSrc = new URL(
+  'pdfjs-dist/build/pdf.worker.min.mjs',
+  import.meta.url,
+).toString()
 
 function App() {
   const [archivo, setArchivo] = useState<File | null>(null)
   const [urlArchivo, setUrlArchivo] = useState<string | null>(null)
+  const [zoomPorcentaje, setZoomPorcentaje] = useState(100)
+  const [numPagesPDF, setNumPagesPDF] = useState(1)
   const [error, setError] = useState('')
   const [normativa, setNormativa] = useState('')
   const [aceptoTerminos, setAceptoTerminos] = useState(false)
@@ -86,6 +97,8 @@ function App() {
     }
 
     setError('')
+    setZoomPorcentaje(100)
+    setNumPagesPDF(1)
     setArchivo(archivoSeleccionado)
   }
 
@@ -122,6 +135,8 @@ function App() {
 
   function ejecutarBorrado() {
     setArchivo(null)
+    setZoomPorcentaje(100)
+    setNumPagesPDF(1)
     setError('')
     setMensajeAnalisis('')
     setAceptoTerminos(false)
@@ -147,20 +162,33 @@ function App() {
     setMensajeAnalisis('Enviando etiqueta...')
 
     try {
-      const respuesta = await fetch('http://127.0.0.1:8000/evaluaciones', {
+      const API_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000'
+      const urlLimpia = API_URL.replace(/\/+$/, '')
+      const urlEvaluaciones = `${urlLimpia}/evaluaciones`
+
+      console.log('URL a la que se intenta conectar:', urlEvaluaciones)
+
+      const respuesta = await fetch(urlEvaluaciones, {
         method: 'POST',
         body: datos,
       })
 
-      const resultado = await respuesta.json()
-
       if (!respuesta.ok) {
-        setMensajeAnalisis(resultado.detail || 'No se pudo enviar la etiqueta.')
+        const textoRespuesta = await respuesta.text()
+        console.error(
+          `Error HTTP ${respuesta.status}. Respuesta del backend:`,
+          textoRespuesta,
+        )
+        setMensajeAnalisis(
+          `Error ${respuesta.status}: ${textoRespuesta || 'No se pudo enviar la etiqueta.'}`,
+        )
         return
       }
 
+      const resultado = await respuesta.json()
       setMensajeAnalisis(`${resultado.mensaje} ${resultado.estado}`)
-    } catch {
+    } catch (error) {
+      console.error(error)
       setMensajeAnalisis(
         'No se pudo conectar con el backend. Comprueba que esté ejecutándose.',
       )
@@ -452,54 +480,108 @@ function App() {
         )}
 
         <main className="viewer-panel">
-          <div className="viewer-toolbar">
-            <div className="viewer-toolbar-left">
-              {!panelIzquierdoAbierto && (
-                <button
-                  type="button"
-                  className="panel-toggle"
-                  onClick={() => setPanelIzquierdoAbierto(true)}
-                  aria-label="Mostrar barra lateral"
-                  title="Mostrar barra lateral"
-                >
-                  <span className="panel-toggle-icon left" />
-                </button>
-              )}
-              <span>VISOR · {archivo ? archivo.name : 'SIN ARCHIVO'}</span>
-            </div>
+          <TransformWrapper
+            key={urlArchivo ?? 'sin-archivo'}
+            initialScale={1}
+            minScale={0.25}
+            maxScale={4}
+            onTransform={(_, state) => setZoomPorcentaje(Math.round(state.scale * 100))}
+          >
+            {({ zoomIn, zoomOut, resetTransform }) => (
+              <>
+                <div className="viewer-toolbar">
+                  <div className="viewer-toolbar-left">
+                    {!panelIzquierdoAbierto && (
+                      <button
+                        type="button"
+                        className="panel-toggle"
+                        onClick={() => setPanelIzquierdoAbierto(true)}
+                        aria-label="Mostrar barra lateral"
+                        title="Mostrar barra lateral"
+                      >
+                        <span className="panel-toggle-icon left" />
+                      </button>
+                    )}
+                    <span>VISOR · {archivo ? archivo.name : 'SIN ARCHIVO'}</span>
+                  </div>
 
-            {!panelDerechoAbierto && (
-              <button
-                type="button"
-                className="panel-toggle"
-                onClick={() => setPanelDerechoAbierto(true)}
-                aria-label="Mostrar barra lateral"
-                title="Mostrar barra lateral"
-              >
-                <span className="panel-toggle-icon" />
-              </button>
+                  <div className="viewer-controls">
+                    <button
+                      type="button"
+                      className="toolbar-btn"
+                      onClick={() => zoomOut()}
+                      disabled={!archivo}
+                      aria-label="Alejar"
+                    >
+                      -
+                    </button>
+                    <button
+                      type="button"
+                      className="toolbar-btn"
+                      onClick={() => zoomIn()}
+                      disabled={!archivo}
+                      aria-label="Acercar"
+                    >
+                      +
+                    </button>
+                    <button
+                      type="button"
+                      className="toolbar-btn fit-btn"
+                      onClick={() => resetTransform()}
+                      disabled={!archivo}
+                    >
+                      FIT
+                    </button>
+                    <span className="zoom-level">{zoomPorcentaje}%</span>
+                  </div>
+
+                  {!panelDerechoAbierto && (
+                    <button
+                      type="button"
+                      className="panel-toggle"
+                      onClick={() => setPanelDerechoAbierto(true)}
+                      aria-label="Mostrar barra lateral"
+                      title="Mostrar barra lateral"
+                    >
+                      <span className="panel-toggle-icon" />
+                    </button>
+                  )}
+                </div>
+
+                <div className="viewer-content">
+                  <TransformComponent wrapperClass="viewer-canvas" contentClass="viewer-canvas-content">
+                    {!archivo && <p>La etiqueta aparecerá aquí</p>}
+
+                    {archivo && urlArchivo && archivo.type.startsWith('image/') && (
+                      <img
+                        className="label-preview"
+                        src={urlArchivo}
+                        alt={`Vista previa de ${archivo.name}`}
+                      />
+                    )}
+
+                    {archivo && urlArchivo && archivo.type === 'application/pdf' && (
+                      <Document
+                        file={urlArchivo}
+                        onLoadSuccess={({ numPages }) => setNumPagesPDF(numPages)}
+                        onLoadError={(pdfError) => setError(`No se pudo cargar el PDF: ${pdfError.message}`)}
+                      >
+                        {Array.from({ length: numPagesPDF }, (_, index) => (
+                          <Page
+                            key={`pagina-${index + 1}`}
+                            className="pdf-page"
+                            pageNumber={index + 1}
+                            renderTextLayer={false}
+                            renderAnnotationLayer={false}
+                          />
+                        ))}
+                      </Document>
+                    )}
+                  </TransformComponent>
+                </div>
+              </>
             )}
-          </div>
-
-          <div className="viewer-content">
-            {!archivo && <p>La etiqueta aparecerá aquí</p>}
-
-            {archivo && urlArchivo && archivo.type.startsWith('image/') && (
-              <img
-                className="label-preview"
-                src={urlArchivo}
-                alt={`Vista previa de ${archivo.name}`}
-              />
-            )}
-
-            {archivo && urlArchivo && archivo.type === 'application/pdf' && (
-              <iframe
-                className="pdf-preview"
-                src={urlArchivo}
-                title={`Vista previa de ${archivo.name}`}
-              />
-            )}
-          </div>
+          </TransformWrapper>
         </main>
 
         {panelDerechoAbierto && (
