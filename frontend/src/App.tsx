@@ -42,7 +42,7 @@ pdfjs.GlobalWorkerOptions.workerSrc = new URL(
 
 function App() {
   const [archivo, setArchivo] = useState<File | null>(null)
-  const [urlArchivo, setUrlArchivo] = useState<string | null>(null)
+  const [vistaPrevia, setVistaPrevia] = useState<{ archivo: File; url: string } | null>(null)
   const [zoomPorcentaje, setZoomPorcentaje] = useState(100)
   const [numPagesPDF, setNumPagesPDF] = useState(1)
   const [paginaActual, setPaginaActual] = useState(1)
@@ -99,21 +99,22 @@ function App() {
     ...(panelDerechoAbierto ? ['1px', `${anchoDerecho}px`] : []),
   ].join(' ')
 
-  useEffect(() => {
+    useEffect(() => {
     if (!archivo) {
-      setUrlArchivo(null)
+      setVistaPrevia(null)
       return
     }
 
     const url = URL.createObjectURL(archivo)
-    setUrlArchivo(url)
+    setVistaPrevia({ archivo, url })
 
     return () => {
       URL.revokeObjectURL(url)
     }
-  }, [archivo])
-
-  function validarYSeleccionarArchivo(archivoSeleccionado: File) {
+    }, [archivo])
+    const urlArchivo = vistaPrevia?.archivo === archivo ? vistaPrevia.url : null
+    
+   function validarYSeleccionarArchivo(archivoSeleccionado: File): boolean {
     const tiposPermitidos = [
       'application/pdf',
       'image/png',
@@ -122,12 +123,12 @@ function App() {
 
     if (!tiposPermitidos.includes(archivoSeleccionado.type)) {
       toast.error('Formato no permitido. Selecciona un archivo PDF, PNG o JPG.')
-      return
+      return false
     }
 
     if (archivoSeleccionado.size > TAMANO_MAXIMO_BYTES) {
       toast.error('El archivo no puede superar los 15 MB.')
-      return
+      return false
     }
 
     setZoomPorcentaje(100)
@@ -135,17 +136,19 @@ function App() {
     setNumPagesPDF(1)
     setPaginaActual(1)
     setArchivo(archivoSeleccionado)
+    return true
   }
 
-  function manejarArchivo(evento: ChangeEvent<HTMLInputElement>) {
+  function manejarArchivo(evento: ChangeEvent<HTMLInputElement>): boolean {
     const archivoSeleccionado = evento.target.files?.[0]
-
-    if (archivoSeleccionado) {
-      validarYSeleccionarArchivo(archivoSeleccionado)
-    }
+    const aceptado = archivoSeleccionado
+      ? validarYSeleccionarArchivo(archivoSeleccionado)
+      : false
 
     // Permite seleccionar nuevamente el mismo archivo.
     evento.target.value = ''
+
+    return aceptado
   }
 
   function manejarArchivoArrastrado(
@@ -363,9 +366,14 @@ function App() {
                             Cambiar archivo
                             <input
                               type="file"
-                              accept=".pdf,.png,.jpg"
+                              accept=".pdf,.png,.jpg,.jpeg"
                               onChange={(evento) => {
-                                manejarArchivo(evento)
+                                // Si el archivo nuevo se rechaza, se conservan el
+                                // archivo actual, los términos y la normativa.
+                                if (!manejarArchivo(evento)) {
+                                  return
+                                }
+
                                 setMensajeAnalisis('')
                                 setAceptoTerminos(false)
                                 setNormativa('')
