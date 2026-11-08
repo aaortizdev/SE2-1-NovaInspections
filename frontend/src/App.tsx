@@ -3,7 +3,8 @@ import type { ChangeEvent, DragEvent, PointerEvent as ReactPointerEvent } from '
 import { Document, Page, pdfjs } from 'react-pdf'
 import { TransformComponent, TransformWrapper } from 'react-zoom-pan-pinch'
 import { Toaster, toast } from 'sonner'
-import LimiteDeErrorVisor from './components/LimiteDeErrorVisor'                         
+import LimiteDeErrorVisor from './components/LimiteDeErrorVisor'
+import CapaDeOverlays, { type CajaOverlay } from './components/CapaDeOverlays'                        
 import 'react-pdf/dist/Page/AnnotationLayer.css'
 import 'react-pdf/dist/Page/TextLayer.css'
 import './App.css'
@@ -33,7 +34,16 @@ async function obtenerMensajeDeError(respuesta: Response) {
   return mensajePorDefecto
 }
 
-
+// Cajas de prueba de DEV2-T4 para comprobar que la capa sigue al zoom y al paneo.
+// Solo se muestran en desarrollo (npm run dev); en el Sprint 2/3 se reemplazan por
+// los hallazgos de la IA.
+const CAJAS_DE_PRUEBA: CajaOverlay[] = import.meta.env.DEV
+  ? [
+      { id: 'prueba-1', pagina: 1, x: 5, y: 5, ancho: 30, alto: 15, severidad: 'critico', etiqueta: 'Crítico' },
+      { id: 'prueba-2', pagina: 1, x: 55, y: 40, ancho: 35, alto: 20, severidad: 'advertencia', etiqueta: 'Advertencia' },
+      { id: 'prueba-3', pagina: 1, x: 10, y: 75, ancho: 40, alto: 15, severidad: 'ok', etiqueta: 'OK' },
+    ]
+  : []
 
 pdfjs.GlobalWorkerOptions.workerSrc = new URL(
   'pdfjs-dist/build/pdf.worker.min.mjs',
@@ -46,6 +56,7 @@ function App() {
   const [zoomPorcentaje, setZoomPorcentaje] = useState(100)
   const [numPagesPDF, setNumPagesPDF] = useState(1)
   const [paginaActual, setPaginaActual] = useState(1)
+  const [mostrarOverlays, setMostrarOverlays] = useState(true)
   const [normativa, setNormativa] = useState('')
   const [aceptoTerminos, setAceptoTerminos] = useState(false)
   const [mensajeAnalisis, setMensajeAnalisis] = useState('')
@@ -108,12 +119,14 @@ function App() {
     const url = URL.createObjectURL(archivo)
     setVistaPrevia({ archivo, url })
 
+
+
     return () => {
       URL.revokeObjectURL(url)
     }
     }, [archivo])
     const urlArchivo = vistaPrevia?.archivo === archivo ? vistaPrevia.url : null
-    
+
    function validarYSeleccionarArchivo(archivoSeleccionado: File): boolean {
     const tiposPermitidos = [
       'application/pdf',
@@ -574,6 +587,19 @@ function App() {
                     >
                       FIT
                     </button>
+
+                    <button
+                      type="button"
+                      className={`toolbar-btn overlay-btn ${mostrarOverlays ? 'active' : ''}`}
+                      onClick={() => setMostrarOverlays((visible) => !visible)}
+                      disabled={!archivo}
+                      aria-pressed={mostrarOverlays}
+                      title={mostrarOverlays ? 'Ocultar overlays' : 'Mostrar overlays'}
+                    >
+                      Overlays
+                    </button>
+
+                  
                     {archivo?.type === 'application/pdf' && (
                       <>
                         <button
@@ -625,34 +651,49 @@ function App() {
                   <TransformComponent wrapperClass="viewer-canvas" contentClass="viewer-canvas-content">
                     {!archivo && <p>La etiqueta aparecerá aquí</p>}
 
-                    {archivo && urlArchivo && archivo.type.startsWith('image/') && (
-                      <img
-                        className="label-preview"
-                        src={urlArchivo}
-                        alt={`Vista previa de ${archivo.name}`}
-                        onError={() => manejarArchivoDanado('imagen')}
-                      />
-                    )}
-
-                    {archivo && urlArchivo && archivo.type === 'application/pdf' && (
-                      <LimiteDeErrorVisor key={urlArchivo} onError={() => manejarArchivoDanado('PDF')}>
-                        <Document
-                          file={urlArchivo}
-                          onLoadSuccess={({ numPages }) => {
-                            setNumPagesPDF(numPages)
-                            setPaginaActual((pagina) => Math.min(pagina, numPages))
-                          }}
-                          onLoadError={() => manejarArchivoDanado('PDF')}
-                        >
-                          <Page
-                            key={`pagina-${paginaActual}`}
-                            className="pdf-page"
-                            pageNumber={paginaActual}
-                            renderTextLayer={false}
-                            renderAnnotationLayer={false}
+                                        {archivo && urlArchivo && (
+                      // Escenario: mide exactamente lo mismo que la etiqueta, para que
+                      // la Capa 2 quede pegada a la imagen o al PDF y no a todo el visor.
+                      <div className="label-stage">
+                        {/* Capa 1: la etiqueta (imagen o PDF) */}
+                        {archivo.type.startsWith('image/') && (
+                          <img
+                            className="label-preview"
+                            src={urlArchivo}
+                            alt={`Vista previa de ${archivo.name}`}
+                            onError={() => manejarArchivoDanado('imagen')}
                           />
-                        </Document>
-                      </LimiteDeErrorVisor>
+                        )}
+
+                        {archivo.type === 'application/pdf' && (
+                          <LimiteDeErrorVisor key={urlArchivo} onError={() => manejarArchivoDanado('PDF')}>
+                            <Document
+                              file={urlArchivo}
+                              onLoadSuccess={({ numPages }) => {
+                                setNumPagesPDF(numPages)
+                                setPaginaActual((pagina) => Math.min(pagina, numPages))
+                              }}
+                              onLoadError={() => manejarArchivoDanado('PDF')}
+                            >
+                              <Page
+                                key={`pagina-${paginaActual}`}
+                                className="pdf-page"
+                                pageNumber={paginaActual}
+                                renderTextLayer={false}
+                                renderAnnotationLayer={false}
+                              />
+                            </Document>
+                          </LimiteDeErrorVisor>
+                        )}
+
+                        {/* Capa 2: overlays de hallazgos */}
+                        {mostrarOverlays && (
+                          <CapaDeOverlays
+                            cajas={CAJAS_DE_PRUEBA}
+                            paginaActual={archivo.type === 'application/pdf' ? paginaActual : 1}
+                          />
+                        )}
+                      </div>
                     )}
                   </TransformComponent>
                 </div>

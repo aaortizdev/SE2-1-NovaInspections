@@ -1,0 +1,57 @@
+/* Capa transparente del mismo tamaño que la etiqueta, pegada encima de ella. */
+.overlay-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  /* No bloquea el arrastre ni la rueda del mouse del visor. */
+  pointer-events: none;
+}
+
+.overlay-box {
+  position: absolute;
+  box-sizing: border-box;
+  border: 2px solid;
+  border-radius: 3px;
+}
+
+.overlay-box--critico {
+  border-color: #dc3545;
+  background-color: #dc354526;
+}
+
+.overlay-box--advertencia {
+  border-color: #f5b400;
+  background-color: #f5b40026;
+}
+
+.overlay-box--ok {
+  border-color: #00b894;
+  background-color: #00b89426;
+}
+
+.overlay-box-label {
+  position: absolute;
+  bottom: 100%;
+  left: -2px;
+  padding: 1px 5px;
+  border-radius: 3px 3px 0 0;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 1.4;
+  white-space: nowrap;
+  background-color: inherit;
+}
+
+.overlay-box--critico .overlay-box-label {
+  background-color: #dc3545;
+}
+
+.overlay-box--advertencia .overlay-box-label {
+  background-color: #f5b400;
+  color: #1f2937;
+}
+
+.overlay-box--ok .overlay-box-label {
+  background-color: #00b894;
+}
