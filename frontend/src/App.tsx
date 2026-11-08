@@ -2,7 +2,8 @@ import { useEffect, useState } from 'react'
 import type { ChangeEvent, DragEvent, PointerEvent as ReactPointerEvent } from 'react'
 import { Document, Page, pdfjs } from 'react-pdf'
 import { TransformComponent, TransformWrapper } from 'react-zoom-pan-pinch'
-import { Toaster, toast } from 'sonner'                          
+import { Toaster, toast } from 'sonner'
+import LimiteDeErrorVisor from './components/LimiteDeErrorVisor'                         
 import 'react-pdf/dist/Page/AnnotationLayer.css'
 import 'react-pdf/dist/Page/TextLayer.css'
 import './App.css'
@@ -151,6 +152,15 @@ function App() {
     setAceptoTerminos(false)
     setNormativa('')
     setMostrarConfirmacionBorrado(false)
+  }
+
+  function manejarArchivoDanado(tipo: 'PDF' | 'imagen') {
+    // El id fijo evita que se apilen toasts repetidos si el evento se dispara varias veces.
+    toast.error(
+      `No se pudo leer ${tipo === 'PDF' ? 'el PDF' : 'la imagen'}. Es posible que el archivo esté dañado.`,
+      { id: 'archivo-danado' },
+    )
+    ejecutarBorrado()
   }
 
   function cancelarBorrado() {
@@ -596,26 +606,29 @@ function App() {
                         className="label-preview"
                         src={urlArchivo}
                         alt={`Vista previa de ${archivo.name}`}
+                        onError={() => manejarArchivoDanado('imagen')}
                       />
                     )}
 
                     {archivo && urlArchivo && archivo.type === 'application/pdf' && (
-                      <Document
-                        file={urlArchivo}
-                        onLoadSuccess={({ numPages }) => {
-                          setNumPagesPDF(numPages)
-                          setPaginaActual((pagina) => Math.min(pagina, numPages))
-                        }}
-                        onLoadError={() => toast.error('No se pudo cargar el PDF. Es posible que el archivo esté dañado.')}
-                      >
-                        <Page
-                          key={`pagina-${paginaActual}`}
-                          className="pdf-page"
-                          pageNumber={paginaActual}
-                          renderTextLayer={false}
-                          renderAnnotationLayer={false}
-                        />
-                      </Document>
+                      <LimiteDeErrorVisor key={urlArchivo} onError={() => manejarArchivoDanado('PDF')}>
+                        <Document
+                          file={urlArchivo}
+                          onLoadSuccess={({ numPages }) => {
+                            setNumPagesPDF(numPages)
+                            setPaginaActual((pagina) => Math.min(pagina, numPages))
+                          }}
+                          onLoadError={() => manejarArchivoDanado('PDF')}
+                        >
+                          <Page
+                            key={`pagina-${paginaActual}`}
+                            className="pdf-page"
+                            pageNumber={paginaActual}
+                            renderTextLayer={false}
+                            renderAnnotationLayer={false}
+                          />
+                        </Document>
+                      </LimiteDeErrorVisor>
                     )}
                   </TransformComponent>
                 </div>
