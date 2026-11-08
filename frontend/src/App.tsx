@@ -4,12 +4,15 @@ import { Document, Page, pdfjs } from 'react-pdf'
 import { TransformComponent, TransformWrapper } from 'react-zoom-pan-pinch'
 import { Toaster, toast } from 'sonner'
 import LimiteDeErrorVisor from './components/LimiteDeErrorVisor'
-import CapaDeOverlays, { type CajaOverlay } from './components/CapaDeOverlays'                        
+import CapaDeOverlays, { type CajaOverlay } from './components/CapaDeOverlays'
+import EntradaZoom from './components/EntradaZoom'                        
 import 'react-pdf/dist/Page/AnnotationLayer.css'
 import 'react-pdf/dist/Page/TextLayer.css'
 import './App.css'
 
 const TAMANO_MAXIMO_BYTES = 15 * 1024 * 1024
+const ESCALA_MINIMA = 0.25 // 25 %
+const ESCALA_MAXIMA = 4 // 400 %
 
 // FastAPI responde los errores como {"detail": "..."}; en errores de validación (422)
 // "detail" llega como una lista de objetos con "msg". Devolvemos solo el texto legible.
@@ -538,11 +541,11 @@ function App() {
           <TransformWrapper
             key={urlArchivo ?? 'sin-archivo'}
             initialScale={1}
-            minScale={0.25}
-            maxScale={4}
+            minScale={ESCALA_MINIMA}
+            maxScale={ESCALA_MAXIMA}
             onTransform={(_, state) => setZoomPorcentaje(Math.round(state.scale * 100))}
           >
-            {({ zoomIn, zoomOut, resetTransform }) => (
+            {({ zoomIn, zoomOut, resetTransform, centerView }) => (
               <>
                 <div className="viewer-toolbar">
                   <div className="viewer-toolbar-left">
@@ -631,7 +634,13 @@ function App() {
                         </button>
                       </>
                     )}
-                    <span className="zoom-level">{zoomPorcentaje}%</span>
+                    <EntradaZoom
+                      porcentaje={zoomPorcentaje}
+                      minimo={ESCALA_MINIMA * 100}
+                      maximo={ESCALA_MAXIMA * 100}
+                      disabled={!archivo}
+                      onCambiar={(porcentaje) => centerView(porcentaje / 100)}
+                    />
                   </div>
 
                   {!panelDerechoAbierto && (

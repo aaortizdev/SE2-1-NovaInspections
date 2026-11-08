@@ -267,10 +267,39 @@
 }
 
 .zoom-level {
+  display: inline-flex;
+  align-items: center;
   min-width: 42px;
   color: #c3d0df;
   font-size: 12px;
   text-align: right;
+}
+
+/* Porcentaje de zoom editable: parece texto hasta que se pasa el mouse o se enfoca. */
+.zoom-input {
+  width: 4ch;
+  padding: 2px 3px;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  background-color: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: right;
+}
+
+.zoom-input:hover:not(:disabled) {
+  border-color: #35465e;
+}
+
+.zoom-input:focus {
+  border-color: #00c9ad;
+  outline: none;
+  background-color: #172c49;
+}
+
+.zoom-input:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .page-level {
