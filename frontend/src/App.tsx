@@ -55,7 +55,7 @@ pdfjs.GlobalWorkerOptions.workerSrc = new URL(
 
 function App() {
   const [archivo, setArchivo] = useState<File | null>(null)
-  const [vistaPrevia, setVistaPrevia] = useState<{ archivo: File; url: string } | null>(null)
+  const [urlArchivo, setUrlArchivo] = useState<string | null>(null)
   const [zoomPorcentaje, setZoomPorcentaje] = useState(100)
   const [numPagesPDF, setNumPagesPDF] = useState(1)
   const [paginaActual, setPaginaActual] = useState(1)
@@ -113,22 +113,18 @@ function App() {
     ...(panelDerechoAbierto ? ['1px', `${anchoDerecho}px`] : []),
   ].join(' ')
 
-    useEffect(() => {
-    if (!archivo) {
-      setVistaPrevia(null)
+      // La URL de vista previa se crea en el mismo momento que se guarda el archivo (ver
+  // validarYSeleccionarArchivo), así archivo y URL cambian juntos en un solo render.
+  // Este efecto solo libera la URL anterior cuando deja de usarse.
+  useEffect(() => {
+    if (!urlArchivo) {
       return
     }
 
-    const url = URL.createObjectURL(archivo)
-    setVistaPrevia({ archivo, url })
-
-
-
     return () => {
-      URL.revokeObjectURL(url)
+      URL.revokeObjectURL(urlArchivo)
     }
-    }, [archivo])
-    const urlArchivo = vistaPrevia?.archivo === archivo ? vistaPrevia.url : null
+  }, [urlArchivo])
 
    function validarYSeleccionarArchivo(archivoSeleccionado: File): boolean {
     const tiposPermitidos = [
@@ -152,6 +148,7 @@ function App() {
     setNumPagesPDF(1)
     setPaginaActual(1)
     setArchivo(archivoSeleccionado)
+    setUrlArchivo(URL.createObjectURL(archivoSeleccionado))
     return true
   }
 
@@ -189,6 +186,7 @@ function App() {
 
   function ejecutarBorrado() {
     setArchivo(null)
+    setUrlArchivo(null)
     setZoomPorcentaje(100)
     setNumPagesPDF(1)
     setPaginaActual(1)
