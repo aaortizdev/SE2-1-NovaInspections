@@ -6,14 +6,10 @@ from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI(title="SOLINAL Etiqueta API")
 
-# Permite que el frontend local se comunique con el backend.
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:5173",
-        "http://127.0.0.1:5173",
-    ],
-    allow_methods=["GET", "POST"],
+    allow_origins=["*"],
+    allow_methods=["*"],
     allow_headers=["*"],
 )
 
