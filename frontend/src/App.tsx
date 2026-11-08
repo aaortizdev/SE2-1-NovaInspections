@@ -10,6 +10,31 @@ import './App.css'
 
 const TAMANO_MAXIMO_BYTES = 15 * 1024 * 1024
 
+// FastAPI responde los errores como {"detail": "..."}; en errores de validación (422)
+// "detail" llega como una lista de objetos con "msg". Devolvemos solo el texto legible.
+async function obtenerMensajeDeError(respuesta: Response) {
+  const mensajePorDefecto = 'No se pudo enviar la etiqueta. Inténtalo de nuevo.'
+
+  try {
+    const cuerpo = await respuesta.json()
+    const detalle = cuerpo?.detail
+
+    if (typeof detalle === 'string' && detalle.trim()) {
+      return detalle
+    }
+
+    if (Array.isArray(detalle) && detalle.length > 0) {
+      return detalle.map((item) => item?.msg).filter(Boolean).join(' ') || mensajePorDefecto
+    }
+  } catch {
+    // La respuesta no era JSON (por ejemplo, una página de error del servidor).
+  }
+
+  return mensajePorDefecto
+}
+
+
+
 pdfjs.GlobalWorkerOptions.workerSrc = new URL(
   'pdfjs-dist/build/pdf.worker.min.mjs',
   import.meta.url,
@@ -178,7 +203,9 @@ function App() {
     datos.append('normativa', normativa)
     datos.append('acepto_terminos', String(aceptoTerminos))
 
-    setMensajeAnalisis('Enviando etiqueta...')
+    setMensajeAnalisis('')
+    // Mismo id en loading, error y éxito: sonner reemplaza el toast en lugar de apilarlos.
+    toast.loading('Enviando etiqueta...', { id: 'analisis' })
 
     try {
       const API_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000'
@@ -192,25 +219,21 @@ function App() {
         body: datos,
       })
 
-      if (!respuesta.ok) {
-        const textoRespuesta = await respuesta.text()
-        console.error(
-          `Error HTTP ${respuesta.status}. Respuesta del backend:`,
-          textoRespuesta,
-        )
-        setMensajeAnalisis(
-          `Error ${respuesta.status}: ${textoRespuesta || 'No se pudo enviar la etiqueta.'}`,
-        )
+            if (!respuesta.ok) {
+        const mensajeError = await obtenerMensajeDeError(respuesta)
+        console.error(`Error HTTP ${respuesta.status}:`, mensajeError)
+        toast.error(mensajeError, { id: 'analisis' })
         return
       }
 
       const resultado = await respuesta.json()
+      toast.success(resultado.mensaje, { id: 'analisis' })
       setMensajeAnalisis(`${resultado.mensaje} ${resultado.estado}`)
     } catch (error) {
       console.error(error)
-      setMensajeAnalisis(
-        'No se pudo conectar con el backend. Comprueba que esté ejecutándose.',
-      )
+      toast.error('No se pudo conectar con el backend. Comprueba que esté ejecutándose.', {
+        id: 'analisis',
+      })
     }
   }
 
@@ -470,13 +493,6 @@ function App() {
                     >
                       Analizar etiqueta
                     </button>
-
-                    {/* Mostramos errores previos al envío exitoso aquí si existen */}
-                    {mensajeAnalisis && !mensajeAnalisis.includes('Pendiente IA') && (
-                      <p className="analysis-message" style={{ color: '#dc3545' }} role="status">
-                        {mensajeAnalisis}
-                      </p>
-                    )}
                   </>
                 ) : (
                   /* Vista cuando el análisis ya está en curso */
