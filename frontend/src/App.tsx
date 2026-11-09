@@ -2,9 +2,51 @@ import { useEffect, useState } from 'react'
 import type { ChangeEvent, DragEvent, PointerEvent as ReactPointerEvent } from 'react'
 import { Document, Page, pdfjs } from 'react-pdf'
 import { TransformComponent, TransformWrapper } from 'react-zoom-pan-pinch'
+import { Toaster, toast } from 'sonner'
+import LimiteDeErrorVisor from './components/LimiteDeErrorVisor'
+import CapaDeOverlays, { type CajaOverlay } from './components/CapaDeOverlays'
+import EntradaZoom from './components/EntradaZoom'                        
 import 'react-pdf/dist/Page/AnnotationLayer.css'
 import 'react-pdf/dist/Page/TextLayer.css'
 import './App.css'
+
+const TAMANO_MAXIMO_BYTES = 15 * 1024 * 1024
+const ESCALA_MINIMA = 0.25 // 25 %
+const ESCALA_MAXIMA = 4 // 400 %
+
+// FastAPI responde los errores como {"detail": "..."}; en errores de validación (422)
+// "detail" llega como una lista de objetos con "msg". Devolvemos solo el texto legible.
+async function obtenerMensajeDeError(respuesta: Response) {
+  const mensajePorDefecto = 'No se pudo enviar la etiqueta. Inténtalo de nuevo.'
+
+  try {
+    const cuerpo = await respuesta.json()
+    const detalle = cuerpo?.detail
+
+    if (typeof detalle === 'string' && detalle.trim()) {
+      return detalle
+    }
+
+    if (Array.isArray(detalle) && detalle.length > 0) {
+      return detalle.map((item) => item?.msg).filter(Boolean).join(' ') || mensajePorDefecto
+    }
+  } catch {
+    // La respuesta no era JSON (por ejemplo, una página de error del servidor).
+  }
+
+  return mensajePorDefecto
+}
+
+// Cajas de prueba de DEV2-T4 para comprobar que la capa sigue al zoom y al paneo.
+// Solo se muestran en desarrollo (npm run dev); en el Sprint 2/3 se reemplazan por
+// los hallazgos de la IA.
+const CAJAS_DE_PRUEBA: CajaOverlay[] = import.meta.env.DEV
+  ? [
+      { id: 'prueba-1', pagina: 1, x: 5, y: 5, ancho: 30, alto: 15, severidad: 'critico', etiqueta: 'Crítico' },
+      { id: 'prueba-2', pagina: 1, x: 55, y: 40, ancho: 35, alto: 20, severidad: 'advertencia', etiqueta: 'Advertencia' },
+      { id: 'prueba-3', pagina: 1, x: 10, y: 75, ancho: 40, alto: 15, severidad: 'ok', etiqueta: 'OK' },
+    ]
+  : []
 
 pdfjs.GlobalWorkerOptions.workerSrc = new URL(
   'pdfjs-dist/build/pdf.worker.min.mjs',
@@ -17,7 +59,7 @@ function App() {
   const [zoomPorcentaje, setZoomPorcentaje] = useState(100)
   const [numPagesPDF, setNumPagesPDF] = useState(1)
   const [paginaActual, setPaginaActual] = useState(1)
-  const [error, setError] = useState('')
+  const [mostrarOverlays, setMostrarOverlays] = useState(true)
   const [normativa, setNormativa] = useState('')
   const [aceptoTerminos, setAceptoTerminos] = useState(false)
   const [mensajeAnalisis, setMensajeAnalisis] = useState('')
@@ -71,21 +113,20 @@ function App() {
     ...(panelDerechoAbierto ? ['1px', `${anchoDerecho}px`] : []),
   ].join(' ')
 
+      // La URL de vista previa se crea en el mismo momento que se guarda el archivo (ver
+  // validarYSeleccionarArchivo), así archivo y URL cambian juntos en un solo render.
+  // Este efecto solo libera la URL anterior cuando deja de usarse.
   useEffect(() => {
-    if (!archivo) {
-      setUrlArchivo(null)
+    if (!urlArchivo) {
       return
     }
 
-    const url = URL.createObjectURL(archivo)
-    setUrlArchivo(url)
-
     return () => {
-      URL.revokeObjectURL(url)
+      URL.revokeObjectURL(urlArchivo)
     }
-  }, [archivo])
+  }, [urlArchivo])
 
-  function validarYSeleccionarArchivo(archivoSeleccionado: File) {
+   function validarYSeleccionarArchivo(archivoSeleccionado: File): boolean {
     const tiposPermitidos = [
       'application/pdf',
       'image/png',
@@ -93,26 +134,34 @@ function App() {
     ]
 
     if (!tiposPermitidos.includes(archivoSeleccionado.type)) {
-      setError('Formato no permitido. Selecciona un archivo PDF, PNG o JPG.')
-      return
+      toast.error('Formato no permitido. Selecciona un archivo PDF, PNG o JPG.')
+      return false
     }
 
-    setError('')
+    if (archivoSeleccionado.size > TAMANO_MAXIMO_BYTES) {
+      toast.error('El archivo no puede superar los 15 MB.')
+      return false
+    }
+
+    setZoomPorcentaje(100)
     setZoomPorcentaje(100)
     setNumPagesPDF(1)
     setPaginaActual(1)
     setArchivo(archivoSeleccionado)
+    setUrlArchivo(URL.createObjectURL(archivoSeleccionado))
+    return true
   }
 
-  function manejarArchivo(evento: ChangeEvent<HTMLInputElement>) {
+  function manejarArchivo(evento: ChangeEvent<HTMLInputElement>): boolean {
     const archivoSeleccionado = evento.target.files?.[0]
-
-    if (archivoSeleccionado) {
-      validarYSeleccionarArchivo(archivoSeleccionado)
-    }
+    const aceptado = archivoSeleccionado
+      ? validarYSeleccionarArchivo(archivoSeleccionado)
+      : false
 
     // Permite seleccionar nuevamente el mismo archivo.
     evento.target.value = ''
+
+    return aceptado
   }
 
   function manejarArchivoArrastrado(
@@ -137,14 +186,23 @@ function App() {
 
   function ejecutarBorrado() {
     setArchivo(null)
+    setUrlArchivo(null)
     setZoomPorcentaje(100)
     setNumPagesPDF(1)
     setPaginaActual(1)
-    setError('')
     setMensajeAnalisis('')
     setAceptoTerminos(false)
     setNormativa('')
     setMostrarConfirmacionBorrado(false)
+  }
+
+  function manejarArchivoDanado(tipo: 'PDF' | 'imagen') {
+    // El id fijo evita que se apilen toasts repetidos si el evento se dispara varias veces.
+    toast.error(
+      `No se pudo leer ${tipo === 'PDF' ? 'el PDF' : 'la imagen'}. Es posible que el archivo esté dañado.`,
+      { id: 'archivo-danado' },
+    )
+    ejecutarBorrado()
   }
 
   function cancelarBorrado() {
@@ -162,7 +220,9 @@ function App() {
     datos.append('normativa', normativa)
     datos.append('acepto_terminos', String(aceptoTerminos))
 
-    setMensajeAnalisis('Enviando etiqueta...')
+    setMensajeAnalisis('')
+    // Mismo id en loading, error y éxito: sonner reemplaza el toast en lugar de apilarlos.
+    toast.loading('Enviando etiqueta...', { id: 'analisis' })
 
     try {
       const API_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000'
@@ -176,30 +236,27 @@ function App() {
         body: datos,
       })
 
-      if (!respuesta.ok) {
-        const textoRespuesta = await respuesta.text()
-        console.error(
-          `Error HTTP ${respuesta.status}. Respuesta del backend:`,
-          textoRespuesta,
-        )
-        setMensajeAnalisis(
-          `Error ${respuesta.status}: ${textoRespuesta || 'No se pudo enviar la etiqueta.'}`,
-        )
+            if (!respuesta.ok) {
+        const mensajeError = await obtenerMensajeDeError(respuesta)
+        console.error(`Error HTTP ${respuesta.status}:`, mensajeError)
+        toast.error(mensajeError, { id: 'analisis' })
         return
       }
 
       const resultado = await respuesta.json()
+      toast.success(resultado.mensaje, { id: 'analisis' })
       setMensajeAnalisis(`${resultado.mensaje} ${resultado.estado}`)
     } catch (error) {
       console.error(error)
-      setMensajeAnalisis(
-        'No se pudo conectar con el backend. Comprueba que esté ejecutándose.',
-      )
+      toast.error('No se pudo conectar con el backend. Comprueba que esté ejecutándose.', {
+        id: 'analisis',
+      })
     }
   }
 
   return (
     <div className="app">
+      <Toaster position="top-right" richColors closeButton /> 
       <header className="header">
         <div className="brand">
           <img
@@ -323,9 +380,14 @@ function App() {
                             Cambiar archivo
                             <input
                               type="file"
-                              accept=".pdf,.png,.jpg"
+                              accept=".pdf,.png,.jpg,.jpeg"
                               onChange={(evento) => {
-                                manejarArchivo(evento)
+                                // Si el archivo nuevo se rechaza, se conservan el
+                                // archivo actual, los términos y la normativa.
+                                if (!manejarArchivo(evento)) {
+                                  return
+                                }
+
                                 setMensajeAnalisis('')
                                 setAceptoTerminos(false)
                                 setNormativa('')
@@ -363,8 +425,6 @@ function App() {
                   </div>
                 </>
               )}
-
-              {error && <p className="file-error">{error}</p>}
 
               <div className="regulation-section">
                 <label htmlFor="normativa" className="section-label">
@@ -455,13 +515,6 @@ function App() {
                     >
                       Analizar etiqueta
                     </button>
-
-                    {/* Mostramos errores previos al envío exitoso aquí si existen */}
-                    {mensajeAnalisis && !mensajeAnalisis.includes('Pendiente IA') && (
-                      <p className="analysis-message" style={{ color: '#dc3545' }} role="status">
-                        {mensajeAnalisis}
-                      </p>
-                    )}
                   </>
                 ) : (
                   /* Vista cuando el análisis ya está en curso */
@@ -486,11 +539,11 @@ function App() {
           <TransformWrapper
             key={urlArchivo ?? 'sin-archivo'}
             initialScale={1}
-            minScale={0.25}
-            maxScale={4}
+            minScale={ESCALA_MINIMA}
+            maxScale={ESCALA_MAXIMA}
             onTransform={(_, state) => setZoomPorcentaje(Math.round(state.scale * 100))}
           >
-            {({ zoomIn, zoomOut, resetTransform }) => (
+            {({ zoomIn, zoomOut, resetTransform, centerView }) => (
               <>
                 <div className="viewer-toolbar">
                   <div className="viewer-toolbar-left">
@@ -535,6 +588,19 @@ function App() {
                     >
                       FIT
                     </button>
+
+                    <button
+                      type="button"
+                      className={`toolbar-btn overlay-btn ${mostrarOverlays ? 'active' : ''}`}
+                      onClick={() => setMostrarOverlays((visible) => !visible)}
+                      disabled={!archivo}
+                      aria-pressed={mostrarOverlays}
+                      title={mostrarOverlays ? 'Ocultar overlays' : 'Mostrar overlays'}
+                    >
+                      Overlays
+                    </button>
+
+                  
                     {archivo?.type === 'application/pdf' && (
                       <>
                         <button
@@ -566,7 +632,13 @@ function App() {
                         </button>
                       </>
                     )}
-                    <span className="zoom-level">{zoomPorcentaje}%</span>
+                    <EntradaZoom
+                      porcentaje={zoomPorcentaje}
+                      minimo={ESCALA_MINIMA * 100}
+                      maximo={ESCALA_MAXIMA * 100}
+                      disabled={!archivo}
+                      onCambiar={(porcentaje) => centerView(porcentaje / 100)}
+                    />
                   </div>
 
                   {!panelDerechoAbierto && (
@@ -586,31 +658,49 @@ function App() {
                   <TransformComponent wrapperClass="viewer-canvas" contentClass="viewer-canvas-content">
                     {!archivo && <p>La etiqueta aparecerá aquí</p>}
 
-                    {archivo && urlArchivo && archivo.type.startsWith('image/') && (
-                      <img
-                        className="label-preview"
-                        src={urlArchivo}
-                        alt={`Vista previa de ${archivo.name}`}
-                      />
-                    )}
+                                        {archivo && urlArchivo && (
+                      // Escenario: mide exactamente lo mismo que la etiqueta, para que
+                      // la Capa 2 quede pegada a la imagen o al PDF y no a todo el visor.
+                      <div className="label-stage">
+                        {/* Capa 1: la etiqueta (imagen o PDF) */}
+                        {archivo.type.startsWith('image/') && (
+                          <img
+                            className="label-preview"
+                            src={urlArchivo}
+                            alt={`Vista previa de ${archivo.name}`}
+                            onError={() => manejarArchivoDanado('imagen')}
+                          />
+                        )}
 
-                    {archivo && urlArchivo && archivo.type === 'application/pdf' && (
-                      <Document
-                        file={urlArchivo}
-                        onLoadSuccess={({ numPages }) => {
-                          setNumPagesPDF(numPages)
-                          setPaginaActual((pagina) => Math.min(pagina, numPages))
-                        }}
-                        onLoadError={(pdfError) => setError(`No se pudo cargar el PDF: ${pdfError.message}`)}
-                      >
-                        <Page
-                          key={`pagina-${paginaActual}`}
-                          className="pdf-page"
-                          pageNumber={paginaActual}
-                          renderTextLayer={false}
-                          renderAnnotationLayer={false}
-                        />
-                      </Document>
+                        {archivo.type === 'application/pdf' && (
+                          <LimiteDeErrorVisor key={urlArchivo} onError={() => manejarArchivoDanado('PDF')}>
+                            <Document
+                              file={urlArchivo}
+                              onLoadSuccess={({ numPages }) => {
+                                setNumPagesPDF(numPages)
+                                setPaginaActual((pagina) => Math.min(pagina, numPages))
+                              }}
+                              onLoadError={() => manejarArchivoDanado('PDF')}
+                            >
+                              <Page
+                                key={`pagina-${paginaActual}`}
+                                className="pdf-page"
+                                pageNumber={paginaActual}
+                                renderTextLayer={false}
+                                renderAnnotationLayer={false}
+                              />
+                            </Document>
+                          </LimiteDeErrorVisor>
+                        )}
+
+                        {/* Capa 2: overlays de hallazgos */}
+                        {mostrarOverlays && (
+                          <CapaDeOverlays
+                            cajas={CAJAS_DE_PRUEBA}
+                            paginaActual={archivo.type === 'application/pdf' ? paginaActual : 1}
+                          />
+                        )}
+                      </div>
                     )}
                   </TransformComponent>
                 </div>
