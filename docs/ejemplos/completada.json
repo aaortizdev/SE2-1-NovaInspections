@@ -1,0 +1,48 @@
+{
+  "evaluation_id": "3f9c1c0e-6b1e-4a52-9d4c-2f1d7a8b9c10",
+  "status": "completed",
+  "archivo": "Manicho_25_g_export.pdf",
+  "normativa": "ecuador",
+  "creado_en": "2026-11-16T14:03:21Z",
+  "actualizado_en": "2026-11-16T14:03:49Z",
+  "paginas_analizadas": 1,
+  "resumen": { "total": 2, "criticos": 1, "advertencias": 1, "conformes": 0 },
+  "hallazgos": [
+    {
+      "id": "F-001",
+      "regla_id": "EC-RTE022-SEM-01",
+      "pagina": 1,
+      "severidad": "critico",
+      "etiqueta": "Crítico",
+      "x": 12.4,
+      "y": 63.0,
+      "ancho": 28.5,
+      "alto": 14.2,
+      "titulo": "Falta el semáforo nutricional",
+      "elemento_evaluado": "Panel frontal",
+      "descripcion_hallazgo": "…",
+      "referencia_normativa": "…",
+      "recomendacion": "…",
+      "confianza": 0.82
+    },
+    {
+      "id": "F-002",
+      "regla_id": "EC-RTE022-ALE-01",
+      "pagina": 1,
+      "severidad": "advertencia",
+      "etiqueta": "Advertencia",
+      "x": null,
+      "y": null,
+      "ancho": null,
+      "alto": null,
+      "titulo": "No se puede confirmar la declaración de alérgenos",
+      "elemento_evaluado": "Lista de ingredientes",
+      "descripcion_hallazgo": "…",
+      "referencia_normativa": "…",
+      "recomendacion": "…",
+      "confianza": 0.55
+    }
+  ],
+  "advertencias_proceso": [],
+  "error": null
+}
