@@ -1,0 +1,17 @@
+{
+  "evaluation_id": "3f9c1c0e-6b1e-4a52-9d4c-2f1d7a8b9c10",
+  "status": "error",
+  "archivo": "Manicho_25_g_export.pdf",
+  "normativa": "ecuador",
+  "creado_en": "2026-11-16T14:03:21Z",
+  "actualizado_en": "2026-11-16T14:04:51Z",
+  "paginas_analizadas": null,
+  "resumen": null,
+  "hallazgos": [],
+  "advertencias_proceso": [],
+  "error": {
+    "codigo": "AI_TIMEOUT",
+    "mensaje": "El motor de IA tardó demasiado en responder. Inténtalo de nuevo.",
+    "reintentable": true
+  }
+}

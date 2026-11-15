@@ -1,0 +1,26 @@
+{
+  "hallazgos": [
+    {
+      "regla_id": "EC-RTE022-SEM-01",
+      "pagina": 1,
+      "severidad": "critico",
+      "caja_2d": [630, 124, 772, 409],
+      "titulo": "Falta el semáforo nutricional",
+      "elemento_evaluado": "Panel frontal",
+      "descripcion_hallazgo": "…",
+      "recomendacion": "…",
+      "confianza": 0.82
+    },
+    {
+      "regla_id": "EC-RTE022-ALE-01",
+      "pagina": 1,
+      "severidad": "advertencia",
+      "caja_2d": null,
+      "titulo": "No se puede confirmar la declaración de alérgenos",
+      "elemento_evaluado": "Lista de ingredientes",
+      "descripcion_hallazgo": "…",
+      "recomendacion": "…",
+      "confianza": 0.55
+    }
+  ]
+}
