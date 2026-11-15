@@ -201,12 +201,17 @@
 }
 
 .viewer-canvas {
-  width: 100%;
-  height: 100%;
+  width: 100% !important;
+  height: 100% !important;
   overflow: hidden !important;
 }
 
 .viewer-canvas-content {
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  width: 100% !important;
+  height: 100% !important;
   min-width: 0;
 }
 
@@ -244,11 +249,57 @@
   font-size: 11px;
 }
 
+.overlay-btn {
+  font-size: 11px;
+}
+
+/* Botón verde "Overlays": encendido cuando la capa está visible. */
+.overlay-btn.active {
+  border-color: #00c9ad;
+  background-color: #00c9ad;
+  color: #0b1b2b;
+}
+
+.overlay-btn.active:hover:not(:disabled) {
+  border-color: #00a892;
+  background-color: #00a892;
+  color: #0b1b2b;
+}
+
 .zoom-level {
+  display: inline-flex;
+  align-items: center;
   min-width: 42px;
   color: #c3d0df;
   font-size: 12px;
   text-align: right;
+}
+
+/* Porcentaje de zoom editable: parece texto hasta que se pasa el mouse o se enfoca. */
+.zoom-input {
+  width: 4ch;
+  padding: 2px 3px;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  background-color: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: right;
+}
+
+.zoom-input:hover:not(:disabled) {
+  border-color: #35465e;
+}
+
+.zoom-input:focus {
+  border-color: #00c9ad;
+  outline: none;
+  background-color: #172c49;
+}
+
+.zoom-input:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .page-level {
@@ -259,7 +310,7 @@
 }
 
 .pdf-page {
-  margin: 0 auto 16px;
+  margin: 0;
   background-color: #fff;
   box-shadow: 0 2px 12px #0006;
 }
@@ -348,11 +399,6 @@
   border-color: #00bfa5;
 }
 
-.file-error {
-  color: #dc3545;
-  font-size: 12px;
-  line-height: 1.5;
-}
 
 .file-help {
   color: #91a4bd;
@@ -360,9 +406,21 @@
   line-height: 1.5;
 }
 
+/*
+ * Escenario de la etiqueta (DEV2-T4): contenedor relativo que se ajusta al tamaño
+ * exacto de la imagen o de la página del PDF. La capa de overlays usa position:
+ * absolute con inset: 0 dentro de él, así que queda pegada a la etiqueta.
+ */
+.label-stage {
+  position: relative;
+  flex: 0 0 auto;
+  max-width: 95%;
+  line-height: 0;
+}
+
 .label-preview {
   display: block;
-  max-width: 95%;
+  max-width: 100%;
   max-height: 75vh;
   object-fit: contain;
 }
