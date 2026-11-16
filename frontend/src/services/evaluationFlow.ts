@@ -7,7 +7,7 @@ export const tiempos = {
   intervaloMs: 2000,
   intervaloLentoMs: 4000,
   pasoALentoMs: 30_000,
-  maximoMs: 3 * 60_000,
+  maximoMs: 8 * 60_000,
 }
 
 const TOAST_ID = 'analisis'

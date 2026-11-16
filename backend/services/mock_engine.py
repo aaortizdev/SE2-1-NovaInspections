@@ -9,18 +9,11 @@ Los textos llevan el prefijo [MOCK]: no son contenido regulatorio real. Los ID d
 
 import asyncio
 import os
-from dataclasses import dataclass
 
 from models.schemas import ETIQUETA_POR_SEVERIDAD, Finding
 from services.errors import AnalisisError
+from services.resultado import ResultadoAnalisis
 from services.store import Evaluacion
-
-
-@dataclass
-class ResultadoAnalisis:
-    hallazgos: list[Finding]
-    paginas_analizadas: int
-    advertencias_proceso: list[str]
 
 
 def _hallazgo(**campos) -> Finding:
