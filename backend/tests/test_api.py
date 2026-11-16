@@ -77,9 +77,11 @@ def test_validaciones_del_sprint_1_siguen_igual():
     assert r.status_code == 400 and r.json()["detail"] == "El archivo no puede superar los 15 MB."
 
 
-def test_union_europea_ya_no_se_acepta_y_estados_unidos_si():
-    assert crear(normativa="union_europea").status_code == 400
-    assert crear(normativa="estados_unidos", nombre="e.png", tipo="image/png", contenido=PNG).status_code == 201
+def test_solo_ecuador_esta_activo_los_demas_mercados_dan_400():
+    assert crear(normativa="ecuador", nombre="e.png", tipo="image/png", contenido=PNG).status_code == 201
+    for mercado in ("estados_unidos", "union_europea", "mexico"):
+        r = crear(normativa=mercado)
+        assert r.status_code == 400 and r.json()["detail"] == "Selecciona una opción válida de normativa."
 
 
 def test_flujo_completo_pending_in_progress_completed():
@@ -141,14 +143,17 @@ def test_error_y_reintento_sin_volver_a_subir_el_archivo():
 
 
 def test_cada_evaluacion_conserva_sus_propios_datos():
-    ec = crear(normativa="ecuador").json()["evaluation_id"]
-    us = crear(normativa="estados_unidos").json()["evaluation_id"]
-    cliente.post(f"/evaluaciones/{ec}/analizar")
-    cliente.post(f"/evaluaciones/{us}/analizar")
+    a = crear(nombre="a.pdf").json()["evaluation_id"]
+    b = crear(nombre="b.pdf").json()["evaluation_id"]
+    assert a != b
+    cliente.post(f"/evaluaciones/{a}/analizar")
 
-    reglas_ec = {h["regla_id"][:2] for h in cliente.get(f"/evaluaciones/{ec}").json()["hallazgos"]}
-    reglas_us = {h["regla_id"][:2] for h in cliente.get(f"/evaluaciones/{us}").json()["hallazgos"]}
-    assert reglas_ec == {"EC"} and reglas_us == {"US"}
+    # Analizar una no toca a la otra.
+    assert cliente.get(f"/evaluaciones/{a}").json()["status"] == "completed"
+    cuerpo_b = cliente.get(f"/evaluaciones/{b}").json()
+    assert cuerpo_b["status"] == "pending" and cuerpo_b["archivo"] == "b.pdf"
+    reglas = {h["regla_id"][:2] for h in cliente.get(f"/evaluaciones/{a}").json()["hallazgos"]}
+    assert reglas == {"EC"}
 
 
 def test_modo_real_sin_conectar_termina_en_error_claro_no_en_in_progress():
