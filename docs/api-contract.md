@@ -24,7 +24,7 @@ Estados: `pending` → `in_progress` → `completed` | `error`. Solo desde `erro
 | `GET /evaluaciones/{id}` | Cada 2 s mientras el estado sea `in_progress` | 200 `EvaluationResultResponse`; 404 no existe |
 | `GET /health` | Al arrancar y para diagnóstico | 200 con el modo (`mock` o `real`) y si hay API key configurada |
 
-Mercados aceptados: `estados_unidos` y `ecuador`. Cualquier otro valor responde 400
+Mercado aceptado en el Sprint 2: solo `ecuador`. Estados Unidos queda como "Próximamente" y, como cualquier otro valor, responde 400
 ("Selecciona una opción válida de normativa.").
 
 ## Hallazgo (`Finding`)

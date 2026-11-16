@@ -383,8 +383,8 @@ function App() {
                     Elige la normativa de análisis
                   </option>
 
-                  <option value="estados_unidos">Estados Unidos (FDA)</option>
                   <option value="ecuador">Ecuador (ARCSA)</option>
+                  <option value="estados_unidos" disabled>Estados Unidos (FDA) · Próximamente</option>
                   <option value="union_europea" disabled>Unión Europea (EFSA) · Próximamente</option>
                   <option value="reino_unido" disabled>Reino Unido (FSA) · Próximamente</option>
                   <option value="mexico" disabled>México (COFEPRIS) · Próximamente</option>
