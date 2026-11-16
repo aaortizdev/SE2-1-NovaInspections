@@ -156,12 +156,13 @@ def test_cada_evaluacion_conserva_sus_propios_datos():
     assert reglas == {"EC"}
 
 
-def test_modo_real_sin_conectar_termina_en_error_claro_no_en_in_progress():
+def test_modo_real_sin_api_key_termina_en_error_claro_no_en_in_progress():
     evaluation_id = crear().json()["evaluation_id"]
-    with entorno(AI_MODE="real"):
+    with entorno(AI_MODE="real", GEMINI_API_KEY=""):
         cliente.post(f"/evaluaciones/{evaluation_id}/analizar")
         cuerpo = cliente.get(f"/evaluaciones/{evaluation_id}").json()
     assert cuerpo["status"] == "error" and cuerpo["error"]["codigo"] == "INTERNAL"
+    assert "GEMINI_API_KEY" in cuerpo["error"]["mensaje"]
     assert cuerpo["error"]["reintentable"] is False
 
 

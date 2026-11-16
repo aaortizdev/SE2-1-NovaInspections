@@ -4,7 +4,7 @@ import logging
 import os
 
 from models.schemas import AnalysisError
-from services import mock_engine
+from services import mock_engine, motor_real
 from services.errors import AnalisisError
 from services.store import EvaluationStore
 
@@ -21,11 +21,12 @@ async def ejecutar_analisis(store: EvaluationStore, evaluation_id: str) -> None:
 
         if modo == "mock":
             resultado = await mock_engine.analizar(evaluacion)
+        elif modo == "real":
+            resultado = await motor_real.analizar(evaluacion)
         else:
-            # AI-8 conectará aquí el motor real (preprocesamiento + Gemini + postproceso).
             raise AnalisisError(
                 "INTERNAL",
-                "El motor de IA real todavía no está conectado. Usa AI_MODE=mock.",
+                f"AI_MODE='{modo}' no es válido. Usa 'mock' o 'real'.",
                 reintentable=False,
             )
 
