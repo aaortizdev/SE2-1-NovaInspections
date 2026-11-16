@@ -4,49 +4,20 @@ import { Document, Page, pdfjs } from 'react-pdf'
 import { TransformComponent, TransformWrapper } from 'react-zoom-pan-pinch'
 import { Toaster, toast } from 'sonner'
 import LimiteDeErrorVisor from './components/LimiteDeErrorVisor'
-import CapaDeOverlays, { type CajaOverlay } from './components/CapaDeOverlays'
-import EntradaZoom from './components/EntradaZoom'                        
+import CapaHallazgos from './components/CapaHallazgos'
+import EntradaZoomConectada from './components/EntradaZoomConectada'
+import BannerEstadoEvaluacion from './components/BannerEstadoEvaluacion'
+import PanelDictamen from './components/PanelDictamen'
+import { useEvaluationStore } from './store/useEvaluationStore'
+import { cancelarEvaluacionActiva, enviarYAnalizar } from './services/evaluationFlow'
 import 'react-pdf/dist/Page/AnnotationLayer.css'
 import 'react-pdf/dist/Page/TextLayer.css'
 import './App.css'
+import './estado-evaluacion.css'
 
 const TAMANO_MAXIMO_BYTES = 15 * 1024 * 1024
 const ESCALA_MINIMA = 0.25 // 25 %
 const ESCALA_MAXIMA = 4 // 400 %
-
-// FastAPI responde los errores como {"detail": "..."}; en errores de validación (422)
-// "detail" llega como una lista de objetos con "msg". Devolvemos solo el texto legible.
-async function obtenerMensajeDeError(respuesta: Response) {
-  const mensajePorDefecto = 'No se pudo enviar la etiqueta. Inténtalo de nuevo.'
-
-  try {
-    const cuerpo = await respuesta.json()
-    const detalle = cuerpo?.detail
-
-    if (typeof detalle === 'string' && detalle.trim()) {
-      return detalle
-    }
-
-    if (Array.isArray(detalle) && detalle.length > 0) {
-      return detalle.map((item) => item?.msg).filter(Boolean).join(' ') || mensajePorDefecto
-    }
-  } catch {
-    // La respuesta no era JSON (por ejemplo, una página de error del servidor).
-  }
-
-  return mensajePorDefecto
-}
-
-// Cajas de prueba de DEV2-T4 para comprobar que la capa sigue al zoom y al paneo.
-// Solo se muestran en desarrollo (npm run dev); en el Sprint 2/3 se reemplazan por
-// los hallazgos de la IA.
-const CAJAS_DE_PRUEBA: CajaOverlay[] = import.meta.env.DEV
-  ? [
-      { id: 'prueba-1', pagina: 1, x: 5, y: 5, ancho: 30, alto: 15, severidad: 'critico', etiqueta: 'Crítico' },
-      { id: 'prueba-2', pagina: 1, x: 55, y: 40, ancho: 35, alto: 20, severidad: 'advertencia', etiqueta: 'Advertencia' },
-      { id: 'prueba-3', pagina: 1, x: 10, y: 75, ancho: 40, alto: 15, severidad: 'ok', etiqueta: 'OK' },
-    ]
-  : []
 
 pdfjs.GlobalWorkerOptions.workerSrc = new URL(
   'pdfjs-dist/build/pdf.worker.min.mjs',
@@ -54,16 +25,24 @@ pdfjs.GlobalWorkerOptions.workerSrc = new URL(
 ).toString()
 
 function App() {
-  const [archivo, setArchivo] = useState<File | null>(null)
-  const [urlArchivo, setUrlArchivo] = useState<string | null>(null)
-  const [zoomPorcentaje, setZoomPorcentaje] = useState(100)
-  const [numPagesPDF, setNumPagesPDF] = useState(1)
-  const [paginaActual, setPaginaActual] = useState(1)
+  const archivo = useEvaluationStore((s) => s.fileData)
+  const urlArchivo = useEvaluationStore((s) => s.previewUrl)
+  const paginaActual = useEvaluationStore((s) => s.pageNumber)
+  const numPagesPDF = useEvaluationStore((s) => s.numPages)
+  const normativa = useEvaluationStore((s) => s.selectedRegulation)
+  const aceptoTerminos = useEvaluationStore((s) => s.termsAccepted)
+  const estado = useEvaluationStore((s) => s.evaluationStatus)
+  const metricas = useEvaluationStore((s) => s.metrics)
+  const setFile = useEvaluationStore((s) => s.setFile)
+  const setNormativa = useEvaluationStore((s) => s.setRegulation)
+  const setAceptoTerminos = useEvaluationStore((s) => s.setTermsAccepted)
+  const setZoomPorcentaje = useEvaluationStore((s) => s.setZoomScale)
+  const setPaginaActual = useEvaluationStore((s) => s.setPageNumber)
+  const setNumPagesPDF = useEvaluationStore((s) => s.setNumPages)
+
   const [mostrarOverlays, setMostrarOverlays] = useState(true)
-  const [normativa, setNormativa] = useState('')
-  const [aceptoTerminos, setAceptoTerminos] = useState(false)
-  const [mensajeAnalisis, setMensajeAnalisis] = useState('')
   const [mostrarConfirmacionBorrado, setMostrarConfirmacionBorrado] = useState(false)
+  const enCurso = estado === 'pending' || estado === 'in_progress'
 
   const [anchoIzquierdo, setAnchoIzquierdo] = useState(350)
   const [anchoDerecho, setAnchoDerecho] = useState(390)
@@ -143,12 +122,9 @@ function App() {
       return false
     }
 
-    setZoomPorcentaje(100)
-    setZoomPorcentaje(100)
-    setNumPagesPDF(1)
-    setPaginaActual(1)
-    setArchivo(archivoSeleccionado)
-    setUrlArchivo(URL.createObjectURL(archivoSeleccionado))
+    // Un archivo nuevo cancela cualquier análisis anterior y limpia sus resultados.
+    cancelarEvaluacionActiva()
+    setFile(archivoSeleccionado, URL.createObjectURL(archivoSeleccionado))
     return true
   }
 
@@ -177,7 +153,7 @@ function App() {
   }
 
   function intentarQuitarArchivo() {
-    if (mensajeAnalisis.includes('Pendiente IA')) {
+    if (enCurso || estado === 'completed') {
       setMostrarConfirmacionBorrado(true)
       return
     }
@@ -185,14 +161,8 @@ function App() {
   }
 
   function ejecutarBorrado() {
-    setArchivo(null)
-    setUrlArchivo(null)
-    setZoomPorcentaje(100)
-    setNumPagesPDF(1)
-    setPaginaActual(1)
-    setMensajeAnalisis('')
-    setAceptoTerminos(false)
-    setNormativa('')
+    cancelarEvaluacionActiva()
+    useEvaluationStore.getState().clearAll()
     setMostrarConfirmacionBorrado(false)
   }
 
@@ -209,49 +179,17 @@ function App() {
     setMostrarConfirmacionBorrado(false)
   }
 
-  async function enviarEvaluacion() {
-    if (!archivo || !normativa || !aceptoTerminos) {
-      return
+  function enviarEvaluacion() {
+    void enviarYAnalizar()
+  }
+
+  function cambiarNormativa(valor: string) {
+    // Cambiar la normativa invalida un resultado o error anterior.
+    if (estado === 'completed' || estado === 'error') {
+      cancelarEvaluacionActiva()
+      useEvaluationStore.getState().resetEvaluation()
     }
-
-    const datos = new FormData()
-
-    datos.append('archivo', archivo)
-    datos.append('normativa', normativa)
-    datos.append('acepto_terminos', String(aceptoTerminos))
-
-    setMensajeAnalisis('')
-    // Mismo id en loading, error y éxito: sonner reemplaza el toast en lugar de apilarlos.
-    toast.loading('Enviando etiqueta...', { id: 'analisis' })
-
-    try {
-      const API_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000'
-      const urlLimpia = API_URL.replace(/\/+$/, '')
-      const urlEvaluaciones = `${urlLimpia}/evaluaciones`
-
-      console.log('URL a la que se intenta conectar:', urlEvaluaciones)
-
-      const respuesta = await fetch(urlEvaluaciones, {
-        method: 'POST',
-        body: datos,
-      })
-
-            if (!respuesta.ok) {
-        const mensajeError = await obtenerMensajeDeError(respuesta)
-        console.error(`Error HTTP ${respuesta.status}:`, mensajeError)
-        toast.error(mensajeError, { id: 'analisis' })
-        return
-      }
-
-      const resultado = await respuesta.json()
-      toast.success(resultado.mensaje, { id: 'analisis' })
-      setMensajeAnalisis(`${resultado.mensaje} ${resultado.estado}`)
-    } catch (error) {
-      console.error(error)
-      toast.error('No se pudo conectar con el backend. Comprueba que esté ejecutándose.', {
-        id: 'analisis',
-      })
-    }
+    setNormativa(valor)
   }
 
   return (
@@ -367,7 +305,7 @@ function App() {
                         <strong>{archivo.name}</strong>
                         <span>Etiqueta cargada</span>
 
-                        {!mensajeAnalisis.includes('Pendiente IA') && (
+                        {!enCurso && (
                           <label
                             className="upload-button"
                             style={{
@@ -388,7 +326,6 @@ function App() {
                                   return
                                 }
 
-                                setMensajeAnalisis('')
                                 setAceptoTerminos(false)
                                 setNormativa('')
                                 setMostrarConfirmacionBorrado(false)
@@ -411,7 +348,11 @@ function App() {
 
                     {mostrarConfirmacionBorrado && (
                       <div className="confirm-overlay">
-                        <p>¿Seguro que deseas cancelar el proceso?</p>
+                        <p>
+                          {enCurso
+                            ? '¿Seguro que deseas cancelar el proceso?'
+                            : 'Se perderán los resultados del análisis. ¿Continuar?'}
+                        </p>
                         <div className="confirm-actions">
                           <button type="button" className="btn-cancelar" onClick={cancelarBorrado}>
                             Cancelar
@@ -435,54 +376,52 @@ function App() {
                   id="normativa"
                   className="regulation-select"
                   value={normativa}
-                  onChange={(evento) => {
-                    setNormativa(evento.target.value)
-                    setMensajeAnalisis('')
-                  }}
+                  disabled={enCurso}
+                  onChange={(evento) => cambiarNormativa(evento.target.value)}
                 >
                   <option value="" disabled>
                     Elige la normativa de análisis
                   </option>
 
                   <option value="estados_unidos">Estados Unidos (FDA)</option>
-                  <option value="union_europea">Unión Europea (EFSA)</option>
-                  <option value="reino_unido">Reino Unido (FSA)</option>
-                  <option value="mexico">México (COFEPRIS)</option>
-                  <option value="colombia">Colombia (INVIMA)</option>
                   <option value="ecuador">Ecuador (ARCSA)</option>
+                  <option value="union_europea" disabled>Unión Europea (EFSA) · Próximamente</option>
+                  <option value="reino_unido" disabled>Reino Unido (FSA) · Próximamente</option>
+                  <option value="mexico" disabled>México (COFEPRIS) · Próximamente</option>
+                  <option value="colombia" disabled>Colombia (INVIMA) · Próximamente</option>
                 </select>
               </div>
 
-              {false && (
+              {estado === 'completed' && metricas && (
                 <section className="metrics-section">
                   <h3 className="section-label">▥ &nbsp; MÉTRICAS / RESUMEN</h3>
 
                   <div className="metrics-grid">
                     <div className="metric-card">
                       <span>TOTAL</span>
-                      <strong>0</strong>
+                      <strong>{metricas.total}</strong>
                     </div>
 
                     <div className="metric-card">
                       <span>CRÍTICOS</span>
-                      <strong className="metric-critical">0</strong>
+                      <strong className="metric-critical">{metricas.criticos}</strong>
                     </div>
 
                     <div className="metric-card">
                       <span>AVISOS</span>
-                      <strong className="metric-warning">0</strong>
+                      <strong className="metric-warning">{metricas.advertencias}</strong>
                     </div>
 
                     <div className="metric-card">
                       <span>CONFORMES</span>
-                      <strong className="metric-ok">0</strong>
+                      <strong className="metric-ok">{metricas.conformes}</strong>
                     </div>
                   </div>
                 </section>
               )}
 
               <div className="consent-section">
-                {!mensajeAnalisis.includes('Pendiente IA') ? (
+                {estado === 'idle' ? (
                   <>
                     <label className="consent-label">
                       <input
@@ -490,7 +429,6 @@ function App() {
                         checked={aceptoTerminos}
                         onChange={(evento) => {
                           setAceptoTerminos(evento.target.checked)
-                          setMensajeAnalisis('')
                         }}
                       />
                       <span>
@@ -517,10 +455,7 @@ function App() {
                     </button>
                   </>
                 ) : (
-                  /* Vista cuando el análisis ya está en curso */
-                  <p className="analysis-message" style={{ color: '#009b88', fontWeight: 'bold', marginTop: 0 }} role="status">
-                    {mensajeAnalisis}
-                  </p>
+                  <BannerEstadoEvaluacion />
                 )}
               </div>
             </aside>
@@ -607,7 +542,7 @@ function App() {
                           type="button"
                           className="toolbar-btn"
                           onClick={() => {
-                            setPaginaActual((pagina) => Math.max(1, pagina - 1))
+                            setPaginaActual(paginaActual - 1)
                             resetTransform()
                           }}
                           disabled={paginaActual === 1}
@@ -622,7 +557,7 @@ function App() {
                           type="button"
                           className="toolbar-btn"
                           onClick={() => {
-                            setPaginaActual((pagina) => Math.min(numPagesPDF, pagina + 1))
+                            setPaginaActual(Math.min(numPagesPDF, paginaActual + 1))
                             resetTransform()
                           }}
                           disabled={paginaActual === numPagesPDF}
@@ -632,8 +567,7 @@ function App() {
                         </button>
                       </>
                     )}
-                    <EntradaZoom
-                      porcentaje={zoomPorcentaje}
+                    <EntradaZoomConectada
                       minimo={ESCALA_MINIMA * 100}
                       maximo={ESCALA_MAXIMA * 100}
                       disabled={!archivo}
@@ -678,7 +612,7 @@ function App() {
                               file={urlArchivo}
                               onLoadSuccess={({ numPages }) => {
                                 setNumPagesPDF(numPages)
-                                setPaginaActual((pagina) => Math.min(pagina, numPages))
+                                setPaginaActual(Math.min(useEvaluationStore.getState().pageNumber, numPages))
                               }}
                               onLoadError={() => manejarArchivoDanado('PDF')}
                             >
@@ -695,10 +629,7 @@ function App() {
 
                         {/* Capa 2: overlays de hallazgos */}
                         {mostrarOverlays && (
-                          <CapaDeOverlays
-                            cajas={CAJAS_DE_PRUEBA}
-                            paginaActual={archivo.type === 'application/pdf' ? paginaActual : 1}
-                          />
+                          <CapaHallazgos />
                         )}
                       </div>
                     )}
@@ -736,7 +667,7 @@ function App() {
                 </button>
               </div>
 
-              <p className="placeholder-text">Los resultados aparecerán aquí.</p>
+              <PanelDictamen />
             </aside>
           </>
         )}
