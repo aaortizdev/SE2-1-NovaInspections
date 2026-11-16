@@ -69,6 +69,25 @@ ancho = (xmax - xmin) / 10     alto = (ymax - ymin) / 10
 
 Ejemplo: `[630, 124, 772, 409]` → `x=12.4, y=63.0, ancho=28.5, alto=14.2`.
 
+## Cómo se muestra un hallazgo en el visor
+
+Cada hallazgo con caja se dibuja sobre la etiqueta con tres elementos:
+
+| Elemento | Qué muestra | De dónde sale |
+| --- | --- | --- |
+| Borde del cuadro | Rojo = Crítico, naranja = Advertencia, verde = OK (mismos tonos de las tarjetas de métricas: `#df2535`, `#e58400`, `#16a34a`) | `severidad` |
+| Círculo con número | Número del hallazgo (1, 2, 3…), el mismo de su tarjeta en el dictamen | Posición en la lista (`F-001` → 1) |
+| Texto al pasar el mouse | `Crítico · {titulo}` (por ejemplo, "Crítico · Falta el semáforo nutricional") | `etiqueta` y `titulo` |
+
+Al hacer clic en un cuadro se resalta su tarjeta del dictamen, y al revés. Un hallazgo sin caja
+(`x` = `null`) aparece solo como tarjeta. No hay campo de categoría: el `titulo` describe el tipo.
+
+## Modo mock
+
+Con `AI_MODE=mock` el backend devuelve 3 hallazgos de ejemplo (1 crítico, 1 advertencia, 1 OK) tras
+`AI_MOCK_DELAY_S` segundos. Con `AI_MOCK_FAIL=true` el análisis termina en `error` (`AI_TIMEOUT`,
+reintentable). Los textos llevan el prefijo `[MOCK]` y los ID de regla son de ejemplo.
+
 ## Ejemplos
 
 - `docs/ejemplos/creada.json` – respuesta de `POST /evaluaciones`
