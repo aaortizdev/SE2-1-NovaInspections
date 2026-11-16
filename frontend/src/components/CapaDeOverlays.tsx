@@ -13,36 +13,68 @@ export type CajaOverlay = {
   alto: number
   severidad: SeveridadHallazgo
   etiqueta?: string
+  titulo?: string // texto del tooltip: "{etiqueta} · {titulo}"
+  numero?: number // número del círculo (posición en el dictamen)
 }
 
 type Props = {
   cajas: CajaOverlay[]
   paginaActual: number
+  zoomPorcentaje?: number
+  seleccionadaId?: string | null
+  onSeleccionar?: (id: string) => void
 }
 
 // Capa 2 del visor: va encima de la etiqueta (Capa 1), dentro del contenedor de
-// zoom y paneo, por eso se mueve y escala junto con ella. En el Sprint 2/3 solo
-// hay que pasarle las cajas que devuelva la IA.
-export default function CapaDeOverlays({ cajas, paginaActual }: Props) {
+// zoom y paneo, por eso se mueve y escala junto con ella.
+export default function CapaDeOverlays({
+  cajas,
+  paginaActual,
+  zoomPorcentaje = 100,
+  seleccionadaId = null,
+  onSeleccionar,
+}: Props) {
   const cajasDeLaPagina = cajas.filter((caja) => caja.pagina === paginaActual)
+  // El círculo y el tooltip se contra-escalan para mantener un tamaño legible con cualquier zoom.
+  const contraEscala = 100 / Math.max(zoomPorcentaje, 1)
 
   return (
-    <div className="overlay-layer" aria-hidden="true">
-      {cajasDeLaPagina.map((caja) => (
-        <div
-          key={caja.id}
-          className={`overlay-box overlay-box--${caja.severidad}`}
-          style={{
-            left: `${caja.x}%`,
-            top: `${caja.y}%`,
-            width: `${caja.ancho}%`,
-            height: `${caja.alto}%`,
-          }}
-          title={caja.etiqueta}
-        >
-          {caja.etiqueta && <span className="overlay-box-label">{caja.etiqueta}</span>}
-        </div>
-      ))}
+    <div className="overlay-layer">
+      {cajasDeLaPagina.map((caja) => {
+        const tooltip = [caja.etiqueta, caja.titulo].filter(Boolean).join(' · ')
+
+        return (
+          <div
+            key={caja.id}
+            className={`overlay-box overlay-box--${caja.severidad}${
+              seleccionadaId === caja.id ? ' overlay-box--selected' : ''
+            }`}
+            style={{
+              left: `${caja.x}%`,
+              top: `${caja.y}%`,
+              width: `${caja.ancho}%`,
+              height: `${caja.alto}%`,
+            }}
+            role={onSeleccionar ? 'button' : undefined}
+            aria-label={tooltip || undefined}
+            onClick={onSeleccionar ? () => onSeleccionar(caja.id) : undefined}
+          >
+            {caja.numero !== undefined && (
+              <span
+                className={`overlay-badge overlay-badge--${caja.severidad}`}
+                style={{ transform: `scale(${contraEscala})` }}
+              >
+                {caja.numero}
+              </span>
+            )}
+            {tooltip && (
+              <span className="overlay-tooltip" style={{ transform: `scale(${contraEscala})` }}>
+                {tooltip}
+              </span>
+            )}
+          </div>
+        )
+      })}
     </div>
   )
 }

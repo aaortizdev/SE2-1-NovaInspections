@@ -1,0 +1,42 @@
+/* Sprint 2: banner de estados, dictamen y overlays numerados. */
+.eval-banner { display:flex; align-items:center; gap:10px; flex-wrap:wrap; padding:10px 12px; border-radius:8px; font-size:13px; font-weight:600; margin-top:8px; }
+.eval-banner--pending { background:#fff6e5; color:#9a5b00; }
+.eval-banner--progress { background:#e6f7f5; color:#007a6b; }
+.eval-banner--done { background:#e8f7ee; color:#16803c; }
+.eval-banner--error { background:#fdeaec; color:#b01c2a; justify-content:space-between; }
+.eval-retry { border:1px solid #b01c2a; background:#fff; color:#b01c2a; border-radius:6px; padding:5px 10px; font-size:12px; font-weight:700; cursor:pointer; }
+.eval-retry:hover { background:#b01c2a; color:#fff; }
+.eval-spinner { width:14px; height:14px; border:2px solid #00b09b55; border-top-color:#009b88; border-radius:50%; animation:eval-spin .8s linear infinite; flex:none; }
+.eval-spinner--amber { border-color:#e5840055; border-top-color:#e58400; }
+@keyframes eval-spin { to { transform:rotate(360deg); } }
+
+.option-soon { color:#9aa3ad; }
+
+.dictamen-list { display:flex; flex-direction:column; gap:10px; padding:4px 2px 16px; }
+.dictamen-warning { background:#fff6e5; color:#9a5b00; border-radius:6px; padding:8px 10px; font-size:12px; margin:0; }
+.finding-card { border:1px solid #e1e5ea; border-left:4px solid #9aa3ad; border-radius:8px; padding:10px 12px; font-size:13px; line-height:1.4; background:#fff; cursor:pointer; }
+.finding-card p { margin:4px 0; }
+.finding-card--critico { border-left-color:#df2535; }
+.finding-card--advertencia { border-left-color:#e58400; }
+.finding-card--ok { border-left-color:#16a34a; }
+.finding-card--selected { box-shadow:0 0 0 2px #009b88; }
+.finding-head { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+.finding-title { flex:1 1 140px; }
+.finding-severity { font-size:11px; font-weight:700; text-transform:uppercase; }
+.finding-severity--critico { color:#df2535; }
+.finding-severity--advertencia { color:#e58400; }
+.finding-severity--ok { color:#16a34a; }
+.finding-element { color:#5b6672; font-size:12px; }
+.finding-foot { display:flex; justify-content:space-between; gap:8px; color:#6b7580; font-size:11px; margin-top:6px; }
+
+.overlay-layer { pointer-events:none; }
+.overlay-box { pointer-events:auto; cursor:pointer; }
+.overlay-box--selected { box-shadow:0 0 0 3px #ffffffcc, 0 0 0 5px #009b88; z-index:2; }
+.overlay-badge { position:absolute; top:0; left:0; transform-origin:top left; display:inline-flex; align-items:center; justify-content:center; width:22px; height:22px; border-radius:50%; color:#fff; font-size:12px; font-weight:700; line-height:1; margin:-11px 0 0 -11px; }
+.overlay-badge--critico { background:#df2535; }
+.overlay-badge--advertencia { background:#e58400; }
+.overlay-badge--ok { background:#16a34a; }
+.finding-number { position:static; margin:0; flex:none; transform:none !important; }
+.overlay-tooltip { display:none; position:absolute; left:0; bottom:100%; transform-origin:bottom left; white-space:nowrap; background:#1f2933; color:#fff; font-size:12px; padding:4px 8px; border-radius:4px; z-index:3; pointer-events:none; }
+.overlay-box:hover { z-index:3; }
+.overlay-box:hover .overlay-tooltip { display:block; }
