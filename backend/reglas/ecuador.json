@@ -12,8 +12,8 @@
     "aplica_si": "Todo alimento procesado, envasado y empaquetado.",
     "cita_fuente": "5.4.1.1: \"El nombre debe indicar la verdadera naturaleza del alimento\"",
     "fuente_url": "https://www.foodchainid.com/product/nte-inen-1334-12014/",
-    "estado": "pendiente_revision",
-    "verificada_por": null
+    "estado": "verificada",
+    "verificada_por": "Ariel Ortiz"
   },
   {
     "id": "EC-RTE022-ING-01",
@@ -28,8 +28,8 @@
     "aplica_si": "Alimentos con más de un ingrediente (exentos los de un único ingrediente).",
     "cita_fuente": "5.4.2.1 a): \"La lista de ingredientes debe ir encabezada o precedida por el título: ingredientes\"",
     "fuente_url": "https://www.foodchainid.com/product/nte-inen-1334-12014/",
-    "estado": "pendiente_revision",
-    "verificada_por": null
+    "estado": "verificada",
+    "verificada_por": "Ariel Ortiz"
   },
   {
     "id": "EC-RTE022-ALE-01",
@@ -44,8 +44,8 @@
     "aplica_si": "Alimentos que contienen alguno de los alérgenos o aditivos del Anexo C.1.",
     "cita_fuente": "Anexo C.1: debe aparecer la expresión \"CONTIENE\" inmediatamente después o junto a la lista de ingredientes",
     "fuente_url": "https://www.foodchainid.com/product/nte-inen-1334-12014/",
-    "estado": "pendiente_revision",
-    "verificada_por": null
+    "estado": "verificada",
+    "verificada_por": "Ariel Ortiz"
   },
   {
     "id": "EC-RTE022-NET-01",
@@ -60,8 +60,8 @@
     "aplica_si": "Alimentos envasados.",
     "cita_fuente": "5.4.3.1: \"Debe declararse en el panel principal el contenido neto en unidades del Sistema Internacional SI\"",
     "fuente_url": "https://www.foodchainid.com/product/nte-inen-1334-12014/",
-    "estado": "pendiente_revision",
-    "verificada_por": null
+    "estado": "verificada",
+    "verificada_por": "Ariel Ortiz"
   },
   {
     "id": "EC-RTE022-FAB-01",
@@ -76,8 +76,8 @@
     "aplica_si": "Alimentos envasados.",
     "cita_fuente": "5.4.4.1: \"Debe indicarse el nombre del fabricante, envasador o propietario de la marca\"",
     "fuente_url": "https://www.foodchainid.com/product/nte-inen-1334-12014/",
-    "estado": "pendiente_revision",
-    "verificada_por": null
+    "estado": "verificada",
+    "verificada_por": "Ariel Ortiz"
   },
   {
     "id": "EC-RTE022-ORI-01",
@@ -92,8 +92,8 @@
     "aplica_si": "Alimentos envasados.",
     "cita_fuente": "5.4.5.1: \"Debe indicarse la ciudad o localidad (para zonas rurales) y el país de origen del alimento\"",
     "fuente_url": "https://www.foodchainid.com/product/nte-inen-1334-12014/",
-    "estado": "pendiente_revision",
-    "verificada_por": null
+    "estado": "verificada",
+    "verificada_por": "Ariel Ortiz"
   },
   {
     "id": "EC-RTE022-LOT-01",
@@ -108,8 +108,8 @@
     "aplica_si": "Alimentos envasados. En un arte de etiqueta el lote suele ser un espacio para imprimir.",
     "cita_fuente": "5.4.6.1: un código \"precedido de la letra 'L' o de la palabra 'Lote'\"",
     "fuente_url": "https://www.foodchainid.com/product/nte-inen-1334-12014/",
-    "estado": "pendiente_revision",
-    "verificada_por": null
+    "estado": "verificada",
+    "verificada_por": "Ariel Ortiz"
   },
   {
     "id": "EC-RTE022-FEC-01",
@@ -124,8 +124,8 @@
     "aplica_si": "Alimentos envasados, salvo frutas y vegetales frescos enteros, vinos y licores de 10 % o más en vidrio, panadería de consumo en 24 h, vinagre en vidrio y sal.",
     "cita_fuente": "5.4.7.1 a): \"Se declarará la fecha máxima de consumo o fecha de vencimiento\"",
     "fuente_url": "https://www.foodchainid.com/product/nte-inen-1334-12014/",
-    "estado": "pendiente_revision",
-    "verificada_por": null
+    "estado": "verificada",
+    "verificada_por": "Ariel Ortiz"
   },
   {
     "id": "EC-RTE022-IDI-01",
@@ -140,8 +140,8 @@
     "aplica_si": "Alimentos comercializados en Ecuador. Un idioma adicional no es incumplimiento.",
     "cita_fuente": "5.7.1: \"debe presentarse en idioma castellano, aceptándose que adicionalmente se repita ésta en otro idioma\"",
     "fuente_url": "https://www.foodchainid.com/product/nte-inen-1334-12014/",
-    "estado": "pendiente_revision",
-    "verificada_por": null
+    "estado": "verificada",
+    "verificada_por": "Ariel Ortiz"
   },
   {
     "id": "EC-RTE022-SEM-01",
@@ -156,8 +156,8 @@
     "aplica_si": "Alimentos procesados con notificación sanitaria. Exentos: los del capítulo de excepciones de la NTE INEN 1334-2 (café, té, especias, agua, vinagre, sal, bebidas alcohólicas, productos primarios), alimentos que solo tienen grasa, azúcar o sal propios sin añadir, fórmulas infantiles, alimentos para regímenes especiales, harinas, aditivos, y envases con menos de 19,4 cm² para rotulado (el semáforo va en el envase externo). Azúcar, sal y grasas animales llevan un mensaje en lugar del semáforo (ver MSJ-01).",
     "cita_fuente": "RTE 5.5.4: \"se debe colocar un sistema gráfico con barras horizontales de colores rojo, amarillo y verde\"",
     "fuente_url": "https://derechoecuador.com/registro-oficial-no-402-lunes-22-de-diciembre-de-2014-suplemento/",
-    "estado": "pendiente_revision",
-    "verificada_por": null
+    "estado": "verificada",
+    "verificada_por": "Ariel Ortiz"
   },
   {
     "id": "EC-RTE022-SEM-02",
@@ -172,8 +172,8 @@
     "aplica_si": "Solo si la etiqueta muestra un semáforo.",
     "cita_fuente": "RTE 5.5.14.3 b): \"El orden de colores de arriba hacia abajo será siempre rojo, amarillo y verde\"",
     "fuente_url": "https://derechoecuador.com/registro-oficial-no-402-lunes-22-de-diciembre-de-2014-suplemento/",
-    "estado": "pendiente_revision",
-    "verificada_por": null
+    "estado": "verificada",
+    "verificada_por": "Ariel Ortiz"
   },
   {
     "id": "EC-RTE022-SEM-03",
@@ -188,8 +188,8 @@
     "aplica_si": "Solo si la etiqueta muestra semáforo y tabla nutricional con datos legibles.",
     "cita_fuente": "RTE 5.5.1: \"se debe referir según lo establecido en la Tabla No. 1\"",
     "fuente_url": "https://derechoecuador.com/registro-oficial-no-402-lunes-22-de-diciembre-de-2014-suplemento/",
-    "estado": "pendiente_revision",
-    "verificada_por": null
+    "estado": "verificada",
+    "verificada_por": "Ariel Ortiz"
   },
   {
     "id": "EC-RTE022-MSJ-01",
@@ -204,8 +204,8 @@
     "aplica_si": "Solo si el producto tiene edulcorantes no calóricos, ingredientes transgénicos (más de 0,9 %), es bebida no alcohólica con menos de 50 % del alimento natural, es bebida energética, o es azúcar, sal o grasa animal.",
     "cita_fuente": "RTE 5.5.9: \"Este producto contiene edulcorante no calórico\"",
     "fuente_url": "https://derechoecuador.com/registro-oficial-no-402-lunes-22-de-diciembre-de-2014-suplemento/",
-    "estado": "pendiente_revision",
-    "verificada_por": null
+    "estado": "verificada",
+    "verificada_por": "Ariel Ortiz"
   },
   {
     "id": "EC-RTE022-NUT-01",
@@ -220,8 +220,8 @@
     "aplica_si": "Alimentos procesados envasados. Exentos: café, té y hierbas sin edulcorar, especias, extractos de sabor y colorantes, aguas, vinagre, sal, bebidas alcohólicas, productos primarios, y envases de menos de 19,4 cm² sin declaraciones nutricionales.",
     "cita_fuente": "1334-2, 4.9.2: \"Los nutrientes deben declararse en el orden especificado en la tabla 1\"",
     "fuente_url": "https://faolex.fao.org/docs/pdf/ecu175751.pdf",
-    "estado": "pendiente_revision",
-    "verificada_por": null
+    "estado": "verificada",
+    "verificada_por": "Ariel Ortiz"
   },
     {
     "id": "EC-RTE022-NUT-02",
@@ -236,8 +236,8 @@
     "aplica_si": "Solo si hay tabla nutricional con valores legibles.",
     "cita_fuente": "4.4.6: el %VD se obtiene al \"dividir la cantidad ... presente en una porción de alimento por el valor diario (VD)\"",
     "fuente_url": "https://faolex.fao.org/docs/pdf/ecu175751.pdf",
-    "estado": "pendiente_revision",
-    "verificada_por": null
+    "estado": "verificada",
+    "verificada_por": "Ariel Ortiz"
   },
   {
     "id": "EC-RTE022-CLA-01",
@@ -252,8 +252,8 @@
     "aplica_si": "Todo alimento procesado.",
     "cita_fuente": "AM 5103 Art. 7 f): se prohíbe \"Atribuir propiedades preventivas o acción terapéutica\"",
     "fuente_url": "https://derechoecuador.com/registro-oficial-no-318-lunes-25-de-agosto-de-2014-segundo-suplemento/",
-    "estado": "pendiente_revision",
-    "verificada_por": null
+    "estado": "verificada",
+    "verificada_por": "Ariel Ortiz"
   },
   {
     "id": "EC-RTE022-CLA-02",
@@ -268,8 +268,8 @@
     "aplica_si": "Solo si la etiqueta tiene declaraciones nutricionales o comparativas.",
     "cita_fuente": "5.1.1 c): la comparación \"debe basarse en una diferencia relativa de al menos 25 %\"",
     "fuente_url": "https://cbm.export.com.gt/sites/default/files/normativas/NTE-INEN-1334-3-Rotulado-de-Productos-Alimenticios-para-consumo-Humano-parte-3.pdf",
-    "estado": "pendiente_revision",
-    "verificada_por": null
+    "estado": "verificada",
+    "verificada_por": "Ariel Ortiz"
   },
   {
     "id": "EC-RTE022-RSA-01",
@@ -284,8 +284,8 @@
     "aplica_si": "Alimentos procesados que requieren notificación sanitaria (ver exenciones del Art. 19 de la Resolución ARCSA).",
     "cita_fuente": "Disposición Décima: reemplazar \"la palabra Notificación sanitaria por 'Código BPM'\"",
     "fuente_url": "https://www.gob.ec/regulaciones/arcsa-2022-016-akrg-expedir-normativa-tecnica-sanitaria-sustitutiva-alimentos-procesados-plantas-procesadoras-establecimientos-distribucion-comercializacion-transporte-alimentos-procesados-alimentacion-colectiva",
-    "estado": "pendiente_revision",
-    "verificada_por": null
+    "estado": "verificada",
+    "verificada_por": "Ariel Ortiz"
   },
   {
     "id": "EC-RTE022-PVP-01",
@@ -300,7 +300,7 @@
     "aplica_si": "Productos alimenticios a la venta en Ecuador. En un arte de etiqueta el PVP suele agregarse después con etiqueta adhesiva.",
     "cita_fuente": "LODC Art. 14: el rotulado debe exhibir obligatoriamente el \"Precio de venta al público\"",
     "fuente_url": "https://faolex.fao.org/docs/pdf/ecu139405.pdf",
-    "estado": "pendiente_revision",
-    "verificada_por": null
+    "estado": "verificada",
+    "verificada_por": "Ariel Ortiz"
   }
 ]
