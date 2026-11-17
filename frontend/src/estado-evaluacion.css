@@ -31,12 +31,11 @@
 
 .overlay-layer { pointer-events:none; }
 .overlay-box { pointer-events:auto; cursor:pointer; }
-.overlay-box--selected { box-shadow:0 0 0 3px #ffffffcc, 0 0 0 5px #009b88; z-index:2; }
+.overlay-box--selected { box-shadow:0 0 0 3px #ffffffcc, 0 0 0 5px #009b88; }
 .overlay-badge { position:absolute; top:0; left:0; transform-origin:top left; display:inline-flex; align-items:center; justify-content:center; width:22px; height:22px; border-radius:50%; color:#fff; font-size:12px; font-weight:700; line-height:1; margin:-11px 0 0 -11px; }
 .overlay-badge--critico { background:#df2535; }
 .overlay-badge--advertencia { background:#e58400; }
 .overlay-badge--ok { background:#16a34a; }
 .finding-number { position:static; margin:0; flex:none; transform:none !important; }
 .overlay-tooltip { display:none; position:absolute; left:0; bottom:100%; transform-origin:bottom left; white-space:nowrap; background:#1f2933; color:#fff; font-size:12px; padding:4px 8px; border-radius:4px; z-index:3; pointer-events:none; }
-.overlay-box:hover { z-index:3; }
 .overlay-box:hover .overlay-tooltip { display:block; }

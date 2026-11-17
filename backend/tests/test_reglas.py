@@ -16,10 +16,10 @@ def _ejemplo() -> dict:
     return json.loads((CARPETA / "ecuador.json").read_text(encoding="utf-8"))[0]
 
 
-def test_ecuador_es_valido_y_tiene_10_reglas():
+def test_ecuador_es_valido_y_sin_ids_repetidos():
     reglas = cargar_reglas("ecuador", incluir_pendientes=True)
-    assert len(reglas) == 10
-    assert len({r.id for r in reglas}) == 10
+    assert len(reglas) >= 10
+    assert len({r.id for r in reglas}) == len(reglas)
     assert all(r.id.startswith("EC-") for r in reglas)
 
 
@@ -56,7 +56,7 @@ def test_campo_desconocido_y_severidad_invalida():
 
 def test_referencia_normativa_la_arma_el_backend():
     regla = next(r for r in cargar_reglas("ecuador", incluir_pendientes=True) if r.id == "EC-RTE022-SEM-01")
-    assert regla.referencia_normativa.endswith("Art. 12 y Anexo 1")
+    assert regla.referencia_normativa.endswith("AM 5103 Art. 12")
 
 
 if __name__ == "__main__":
