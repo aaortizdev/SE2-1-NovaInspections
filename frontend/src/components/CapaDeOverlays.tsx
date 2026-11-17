@@ -35,6 +35,11 @@ export default function CapaDeOverlays({
   onSeleccionar,
 }: Props) {
   const cajasDeLaPagina = cajas.filter((caja) => caja.pagina === paginaActual)
+  // Las cajas más pequeñas van encima de las grandes: así una caja que contiene a otras
+  // (por ejemplo, "información no está en español") no tapa a las de adentro y todas se pueden
+  // seleccionar con el mouse. La selección y el hover no cambian este orden.
+  const porArea = [...cajasDeLaPagina].sort((a, b) => b.ancho * b.alto - a.ancho * a.alto)
+  const capaDe = new Map(porArea.map((caja, i) => [caja.id, i + 1]))
   // El círculo y el tooltip se contra-escalan para mantener un tamaño legible con cualquier zoom.
   const contraEscala = 100 / Math.max(zoomPorcentaje, 1)
 
@@ -54,6 +59,7 @@ export default function CapaDeOverlays({
               top: `${caja.y}%`,
               width: `${caja.ancho}%`,
               height: `${caja.alto}%`,
+              zIndex: capaDe.get(caja.id),
             }}
             role={onSeleccionar ? 'button' : undefined}
             aria-label={tooltip || undefined}
