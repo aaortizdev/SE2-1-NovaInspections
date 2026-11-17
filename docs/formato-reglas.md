@@ -1,6 +1,6 @@
 # Reglas regulatorias – formato y verificación
 
-Las reglas viven en `backend/reglas/ecuador.json` (10 reglas en el Sprint 2). Estados Unidos queda como "Próximamente":
+Las reglas viven en `backend/reglas/ecuador.json` (19 reglas en el Sprint 2). Estados Unidos queda como "Próximamente":
 el archivo se creará cuando entre al alcance y se activará en `MERCADOS_ACTIVOS` (`backend/models/reglas.py`).
 El archivo es una lista de objetos. Se valida con:
 
@@ -40,9 +40,14 @@ El motor solo usa reglas `verificada`. En desarrollo se pueden incluir todas con
 
 ## Fuentes y límites
 
-- **Ecuador:** NTE INEN 1334-1:2011 (rotulado general, que remite el RTE INEN 022) y el Reglamento Sanitario de Etiquetado de Alimentos Procesados (Acuerdo 4522, texto de junio de 2014 en la web de ARCSA).
-- El texto oficial del RTE INEN 022 (2R) no pudo leerse directamente (el sitio del INEN bloquea la lectura automática y la modificatoria publicada en ARCSA solo trae los numerales 9.1 y 9.2). Hay que confirmar contra la versión vigente que los numerales de la NTE INEN 1334-1 siguen aplicando.
-- Pendientes para una siguiente ronda: tabla nutricional (NTE INEN 1334-2), registro sanitario, advertencia "CONTIENE TRANSGÉNICOS" (Art. 22 del Acuerdo 4522).
+Revisadas el 16/11/2026 contra los textos que entregó el equipo:
+
+- **Nivel 1 (requisitos obligatorios y semáforo):** RTE INEN 022 (2R), Resolución 14 511 de 2014; Acuerdo Ministerial 5103 (Reglamento Sanitario Sustitutivo de Etiquetado, que deroga el Acuerdo 4522); NTE INEN 1334-1:2014 (cuarta revisión), que el RTE 022 exige en su numeral 5.1.
+- **Nivel 2 (tabla nutricional y declaraciones):** NTE INEN 1334-2 (tercera revisión; la copia disponible lleva fecha "2016-xx") y NTE INEN 1334-3:2011.
+- **Nivel 3 (comercialización):** Resolución ARCSA-DE-2022-016-AKRG (Disposiciones Generales Décima y Décima Primera, Art. 19) y Ley Orgánica de Defensa del Consumidor (Arts. 10, 13 y 14).
+- La copia de la NTE INEN 1334-1:2014 numera la sección de fechas como 5.1.7 aunque va entre 5.4.6 y 5.4.8; las reglas la citan como 5.4.7.
+- La NTE INEN 1334-2 lista como obligatorios energía, grasa total, saturada, colesterol, sodio, carbohidratos, fibra y proteína; los azúcares son voluntarios salvo que haya una declaración sobre carbohidratos.
+- Medidas que la IA no puede comprobar en una imagen (área del semáforo en cm², colores CMYK exactos, tipografía) solo se reportan si el incumplimiento es evidente.
 - Esto es una guía técnica para el MVP y no constituye asesoría legal.
 
 ## Lista de reglas (para revisar)
@@ -51,13 +56,22 @@ El motor solo usa reglas `verificada`. En desarrollo se pueden incluir todas con
 
 | ID | Regla | Referencia | Severidad | Estado |
 | --- | --- | --- | --- | --- |
-| `EC-RTE022-NOM-01` | Nombre del alimento | NTE INEN 1334-1:2011 (rotulado general, referida por el RTE INEN 022), 5.1.1 | critico | pendiente_revision |
-| `EC-RTE022-ING-01` | Lista de ingredientes con título 'Ingredientes' | NTE INEN 1334-1:2011, 5.1.2.1 a) y b) | advertencia | pendiente_revision |
-| `EC-RTE022-ALE-01` | Declaración 'CONTIENE' de alérgenos | NTE INEN 1334-1:2011, 5.1.2.2 b) y Anexo C.1 | critico | pendiente_revision |
-| `EC-RTE022-NET-01` | Contenido neto en el panel principal en unidades SI | NTE INEN 1334-1:2011, 5.1.3.1 | critico | pendiente_revision |
-| `EC-RTE022-FAB-01` | Fabricante, envasador o importador | NTE INEN 1334-1:2011, 5.1.4.1 y 5.1.4.2 | critico | pendiente_revision |
-| `EC-RTE022-ORI-01` | País de origen | NTE INEN 1334-1:2011, 5.1.5.1 | critico | pendiente_revision |
-| `EC-RTE022-LOT-01` | Identificación del lote | NTE INEN 1334-1:2011, 5.1.6.1 | advertencia | pendiente_revision |
-| `EC-RTE022-FEC-01` | Fecha de vencimiento y condiciones de conservación | NTE INEN 1334-1:2011, 5.1.7.1 y 5.1.7.2 | advertencia | pendiente_revision |
-| `EC-RTE022-SEM-01` | Semáforo nutricional visible en el panel principal | Reglamento Sanitario de Etiquetado de Alimentos Procesados (Acuerdo Ministerial 4522), Art. 12 y Anexo 1 | critico | pendiente_revision |
-| `EC-RTE022-IDI-01` | Información obligatoria en español y legible | NTE INEN 1334-1:2011, 5.4.1 y 5.5.3 | critico | pendiente_revision |
+| `EC-RTE022-NOM-01` | Nombre del alimento | NTE INEN 1334-1:2014 (4R), exigida por el RTE INEN 022 (2R) 5.1, 5.4.1.1 y 5.4.1.2 | critico | pendiente_revision |
+| `EC-RTE022-ING-01` | Lista de ingredientes con título 'Ingredientes' | NTE INEN 1334-1:2014 (4R), exigida por el RTE INEN 022 (2R) 5.1, 5.4.2.1 a) y b) | critico | pendiente_revision |
+| `EC-RTE022-ALE-01` | Declaración 'CONTIENE' de alérgenos | NTE INEN 1334-1:2014 (4R), exigida por el RTE INEN 022 (2R) 5.1, 5.4.2.2 b) y Anexo C.1 | critico | pendiente_revision |
+| `EC-RTE022-NET-01` | Contenido neto en el panel principal en unidades SI | NTE INEN 1334-1:2014 (4R), exigida por el RTE INEN 022 (2R) 5.1, 5.4.3.1 y 5.8.6 | critico | pendiente_revision |
+| `EC-RTE022-FAB-01` | Fabricante, envasador o importador | NTE INEN 1334-1:2014 (4R), exigida por el RTE INEN 022 (2R) 5.1, 5.4.4.1 y 5.4.4.2 | critico | pendiente_revision |
+| `EC-RTE022-ORI-01` | Ciudad y país de origen | NTE INEN 1334-1:2014 (4R), exigida por el RTE INEN 022 (2R) 5.1, 5.4.5.1 y 5.4.5.2 | critico | pendiente_revision |
+| `EC-RTE022-LOT-01` | Identificación del lote | NTE INEN 1334-1:2014 (4R), exigida por el RTE INEN 022 (2R) 5.1, 5.4.6.1 | advertencia | pendiente_revision |
+| `EC-RTE022-FEC-01` | Fecha de vencimiento y condiciones de conservación | NTE INEN 1334-1:2014 (4R), exigida por el RTE INEN 022 (2R) 5.1, 5.4.7.1 (impreso como 5.1.7.1) y 5.4.7.2 | critico | pendiente_revision |
+| `EC-RTE022-IDI-01` | Información obligatoria en castellano y legible | NTE INEN 1334-1:2014 (4R); Ley Orgánica de Defensa del Consumidor; RTE INEN 022 (2R), 1334-1: 5.7.1 y 5.8.3; LODC Art. 10; RTE 4.3 | critico | pendiente_revision |
+| `EC-RTE022-SEM-01` | Semáforo nutricional presente | RTE INEN 022 (2R); Acuerdo Ministerial 5103, RTE 5.5.4 y 5.5.5; AM 5103 Art. 12 | critico | pendiente_revision |
+| `EC-RTE022-SEM-02` | Formato y ubicación del semáforo | RTE INEN 022 (2R); Acuerdo Ministerial 5103, RTE 5.5.5, 5.5.5.1, 5.5.5.2 y 5.5.14.3; AM 5103 Anexo 1 | advertencia | pendiente_revision |
+| `EC-RTE022-SEM-03` | Niveles del semáforo coherentes con la tabla nutricional | RTE INEN 022 (2R); Acuerdo Ministerial 5103, RTE 5.5.1 Tabla 1 y 5.5.14.1; AM 5103 Art. 9 | advertencia | pendiente_revision |
+| `EC-RTE022-MSJ-01` | Mensajes de advertencia obligatorios | RTE INEN 022 (2R); Acuerdo Ministerial 5103, RTE 5.2, 5.5.7, 5.5.9, 5.5.10, 5.5.11 y 5.5.14.3 j); AM 5103 Arts. 15, 17, 18, 20 y 22 | critico | pendiente_revision |
+| `EC-RTE022-NUT-01` | Tabla nutricional con los nutrientes obligatorios | NTE INEN 1334-2 (3R), exigida por el RTE INEN 022 (2R) 5.1; Ley Orgánica de Defensa del Consumidor, 1334-2: 4.2.1, 4.2.2, 4.4.2, 4.4.12 y 4.9.2; LODC Art. 14 g) | critico | pendiente_revision |
+| `EC-RTE022-NUT-02` | Coherencia de los valores nutricionales | NTE INEN 1334-2 (3R), 4.3.1, 4.4.5, 4.4.6 y Tabla 5 | advertencia | pendiente_revision |
+| `EC-RTE022-CLA-01` | Declaraciones prohibidas o engañosas | NTE INEN 1334-1:2014 (4R); RTE INEN 022 (2R); Acuerdo Ministerial 5103; NTE INEN 1334-3:2011, 1334-1: 5.2; RTE 5.5.15; AM 5103 Art. 7; 1334-3: 5.1.3 y 5.1.4.2 | critico | pendiente_revision |
+| `EC-RTE022-CLA-02` | Declaraciones nutricionales dentro de los umbrales | NTE INEN 1334-3:2011, 4.4, 5.1.1 y Tabla 1 | advertencia | pendiente_revision |
+| `EC-RTE022-RSA-01` | Notificación Sanitaria o Código BPM | NTE INEN 1334-1:2014 (4R); Ley Orgánica de Defensa del Consumidor; Resolución ARCSA-DE-2022-016-AKRG, 1334-1: 5.4.11; LODC Art. 14 f); ARCSA Disposiciones Generales Décima y Décima Primera | critico | pendiente_revision |
+| `EC-RTE022-PVP-01` | Precio de venta al público (PVP) | Ley Orgánica de Defensa del Consumidor; NTE INEN 1334-1:2014 (4R), LODC Art. 14 j); 1334-1: 5.8.2 | advertencia | pendiente_revision |

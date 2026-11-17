@@ -108,7 +108,7 @@ def test_caja_0_1000_se_convierte_a_porcentaje():
     h, _ = _procesar([ia()])
     assert (h[0].x, h[0].y, h[0].ancho, h[0].alto) == (12.4, 63.0, 28.5, 14.2)
     assert h[0].etiqueta == "Crítico" and h[0].id == "F-001"
-    assert h[0].referencia_normativa.startswith("Reglamento Sanitario de Etiquetado")
+    assert h[0].referencia_normativa.startswith("RTE INEN 022 (2R)")
 
 
 def test_regla_desconocida_se_descarta_con_aviso():
@@ -126,7 +126,7 @@ def test_caja_degenerada_o_fuera_de_rango():
 
 
 def test_ia_no_puede_agravar_la_severidad_de_la_regla():
-    h, _ = _procesar([ia(regla_id="EC-RTE022-ING-01", severidad="critico")])  # la regla es 'advertencia'
+    h, _ = _procesar([ia(regla_id="EC-RTE022-LOT-01", severidad="critico")])  # la regla es 'advertencia'
     assert h[0].severidad == "advertencia"
 
 
