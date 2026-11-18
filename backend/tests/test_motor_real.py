@@ -8,13 +8,10 @@ import io
 import json
 import os
 import sys
+import pytest
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-
-os.environ["AI_MODE"] = "real"
-os.environ["GEMINI_API_KEY"] = "clave-falsa-de-prueba"
-os.environ["REGLAS_INCLUIR_PENDIENTES"] = "true"
 
 import pymupdf
 from google.genai import errors as genai_errors
@@ -27,6 +24,25 @@ from services.preprocesamiento import preparar
 from services.prompt import construir_prompt
 from services.reglas import cargar_reglas
 from services.store import EvaluationStore
+
+@pytest.fixture(autouse=True)
+def configurar_entorno_motor_real():
+    variables = {
+        "AI_MODE": "real",
+        "GEMINI_API_KEY": "clave-falsa-de-prueba",
+        "REGLAS_INCLUIR_PENDIENTES": "true",
+    }
+
+    anteriores = {k: os.environ.get(k) for k in variables}
+    os.environ.update(variables)
+
+    yield
+
+    for clave, valor in anteriores.items():
+        if valor is None:
+            os.environ.pop(clave, None)
+        else:
+            os.environ[clave] = valor
 
 REGLAS = cargar_reglas("ecuador", incluir_pendientes=True)
 
@@ -190,35 +206,50 @@ def _evaluacion(contenido: bytes, tipo: str, normativa="ecuador"):
     return store.crear(archivo="e", tipo_contenido=tipo, contenido=contenido, normativa=normativa)
 
 
-def test_motor_completo_con_ia_falsa():
+def test_motor_completo_con_ia_falsa(monkeypatch):
     capturado = {}
+
+    reglas = cargar_reglas("ecuador", incluir_pendientes=False)
+
+    reglas_con_pendiente = [
+        regla.model_copy(update={"estado": "pendiente_revision"})
+        if regla.id == "EC-RTE022-NET-01"
+        else regla
+        for regla in reglas
+    ]
+
+    monkeypatch.setattr(
+        motor_real,
+        "cargar_reglas",
+        lambda normativa: reglas_con_pendiente,
+    )
 
     async def falsa(paginas, prompt):
         capturado.update(n=len(paginas), prompt=prompt)
-        return json.dumps({"hallazgos": [ia(), ia(regla_id="EC-RTE022-NET-01", severidad="ok", caja_2d=None)]})
+        return json.dumps({
+            "hallazgos": [
+                ia(),
+                ia(regla_id="EC-RTE022-NET-01", severidad="ok", caja_2d=None),
+            ]
+        })
 
-    original, motor_real._generar = motor_real._generar, falsa
-    try:
-        r = correr(motor_real.analizar(_evaluacion(pdf(2), "application/pdf")))
-    finally:
-        motor_real._generar = original
+    monkeypatch.setattr(motor_real, "_generar", falsa)
+
+    r = correr(motor_real.analizar(_evaluacion(pdf(2), "application/pdf")))
 
     assert capturado["n"] == 2 and r.paginas_analizadas == 2
     assert [h.severidad for h in r.hallazgos] == ["critico", "ok"]
     assert "pendientes de verificación" in r.advertencias_proceso[0]
 
+def test_sin_reglas_verificadas_y_sin_pendientes_da_error_claro(monkeypatch):
+    monkeypatch.setattr(motor_real, "cargar_reglas", lambda normativa: [])
 
-def test_sin_reglas_verificadas_y_sin_pendientes_da_error_claro():
-    anterior = os.environ["REGLAS_INCLUIR_PENDIENTES"]
-    os.environ["REGLAS_INCLUIR_PENDIENTES"] = "false"
-    try:
+    with pytest.raises(AnalisisError) as error:
         correr(motor_real.analizar(_evaluacion(pdf(1), "application/pdf")))
-    except AnalisisError as e:
-        assert e.codigo == "INTERNAL" and e.reintentable is False and "reglas verificadas" in e.mensaje
-    else:
-        raise AssertionError("debía fallar")
-    finally:
-        os.environ["REGLAS_INCLUIR_PENDIENTES"] = anterior
+
+    assert error.value.codigo == "INTERNAL"
+    assert error.value.reintentable is False
+    assert "reglas verificadas" in error.value.mensaje
 
 
 def test_flujo_http_completo_en_modo_real_con_ia_falsa():
