@@ -32,7 +32,12 @@ def test_mercado_no_activo_se_rechaza():
 
 
 def test_por_defecto_solo_se_usan_verificadas():
-    assert cargar_reglas("ecuador", incluir_pendientes=False) == []
+    todas = cargar_reglas("ecuador", incluir_pendientes=True)
+    verificadas = cargar_reglas("ecuador", incluir_pendientes=False)
+
+    assert verificadas
+    assert all(r.estado == "verificada" for r in verificadas)
+    assert verificadas == [r for r in todas if r.estado == "verificada"]
 
 
 def test_formato_de_id_invalido():
