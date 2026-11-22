@@ -18,7 +18,7 @@
 
 | Task | Description | Owner | Status |
 |---|---|---|---|
-| SM-T1 | GitHub repository, branch protection on main/develop, PR templates, base environment variables | Ariel, Walter | Done |
+| SM-T1 | GitHub repository, main and feature/* branches with pull-request merges, base environment variables | Ariel, Walter | Done |
 | SM-T2 | Navigation shell from Figma (dark sidebar, logo, Detector access) | Ariel, Walter | Done |
 | SM-T3 | Validate immutability of the original file under zoom/pan (US-2 CA-6) | Ariel, Walter | Done |
 | SM-T4 | Agile ceremonies and QA acceptance checklist on each PR | Ariel | Partial (no meetings; confirmations via WhatsApp) |
