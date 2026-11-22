@@ -12,3 +12,8 @@ frontend/dist/
 .env
 .env.*
 !.env.example
+
+# Reportes de cobertura y caché de pytest
+.coverage
+htmlcov/
+.pytest_cache/
