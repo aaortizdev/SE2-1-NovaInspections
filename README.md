@@ -44,7 +44,7 @@ The platform allows users to upload product labels for AI-assisted analysis, ide
 - AI-assisted analysis to review compliance with labeling requirements.
 - Identification of potential non-compliance issues and observations.
 - Presentation of analysis results.
-- Access to previously performed analyses.
+- Analysis history (planned for Sprint 4).
 
 ## System Architecture
 
@@ -57,6 +57,49 @@ NovaInspections follows a frontend-backend architecture:
 5. The backend validates and processes the uploaded file.
 6. The artificial intelligence service uses Google Gemini to analyze the label and evaluate its compliance with the applicable requirements.
 7. The backend returns the analysis results to the frontend for presentation.
+
+## Local Installation
+
+Requirements: Git, Python 3.12 and Node.js ≥ 22.13.
+
+Backend (from `backend/`):
+
+```bash
+python -m venv venv
+source venv/bin/activate              # Windows: .\venv\Scripts\Activate.ps1
+pip install -r requirements.txt
+cp .env.example .env                  # Windows: Copy-Item .env.example .env
+uvicorn main:app --reload             # http://127.0.0.1:8000 · docs at /docs
+```
+
+`.env.example` starts in `AI_MODE=mock`, so the app works without an API key. To use Gemini, set `AI_MODE=real` and `GEMINI_API_KEY` in `.env` (never commit it).
+
+Frontend (from `frontend/`):
+
+```bash
+npm ci
+cp .env.example .env                  # Windows: Copy-Item .env.example .env
+npm run dev                           # http://localhost:5173
+```
+
+## Running Tests
+
+```bash
+cd backend && pytest                  # 53 unit and integration tests
+cd frontend && npm run lint && npm run build
+```
+
+GitHub Actions runs these checks on every push to `main` and `feature/**` and on every pull request to `main` (`.github/workflows/ci.yml`).
+
+## Project Documentation
+
+| Document | Location |
+|---|---|
+| SCRUM artifacts (sprint plans, backlog, roles) | [docs/scrum/](docs/scrum/README.md) |
+| Test plan, test cases and evidence | [docs/testing/](docs/testing/README.md) |
+| Communications index and acceptance forms | [Communications/](Communications/README.md) |
+| API contract | [docs/api-contract.md](docs/api-contract.md) |
+| Rule format | [docs/formato-reglas.md](docs/formato-reglas.md) |
 
 ## Environment Variables
 
