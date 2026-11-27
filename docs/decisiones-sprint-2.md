@@ -2,7 +2,7 @@
 
 - **Flujo de estados:** polling. `POST /evaluaciones` (pending) → `POST /evaluaciones/{id}/analizar`
   (in_progress, análisis en segundo plano) → `GET /evaluaciones/{id}` cada 2 s hasta `completed` o `error`.
-- **Mercados del sprint:** solo Ecuador (ARCSA / RTE INEN 022). Estados Unidos (FDA) pasó a "Próximamente" el 15/11/2026: sus reglas quedan redactadas en `backend/reglas/estados_unidos.json` pero no se usan. Los demás también quedan en "Próximamente".
+- **Mercados del sprint:** solo Ecuador (ARCSA / RTE INEN 022). Estados Unidos (FDA) pasó a "Próximamente" el 15/11/2026; el archivo `backend/reglas/estados_unidos.json` se creará cuando entre al alcance. Los demás también quedan en "Próximamente".
 - **Proveedor de IA:** Gemini (SDK `google-genai`), modelo `gemini-3.8-flash`, configurable con `AI_MODEL`.
   La API key la gestiona una sola persona del equipo y vive solo en `backend/.env` (nunca en el repositorio).
 - **Cajas:** la IA devuelve `box_2d` = `[ymin, xmin, ymax, xmax]` en escala 0–1000; el backend lo convierte a
