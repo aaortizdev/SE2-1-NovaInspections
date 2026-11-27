@@ -29,7 +29,7 @@ app.add_middleware(
 )
 
 # Sprint 2: solo Ecuador (ARCSA / RTE INEN 022). Estados Unidos (FDA) queda como "Próximamente":
-# sus reglas ya están en backend/reglas/estados_unidos.json; para activarlo basta agregarlo aquí.
+# para activarlo, crear backend/reglas/estados_unidos.json y agregarlo aquí y en MERCADOS_ACTIVOS.
 MERCADOS_PERMITIDOS = {
     "ecuador",
 }

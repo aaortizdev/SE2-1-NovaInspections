@@ -12,7 +12,7 @@
 - SM-T4 was handled asynchronously: no meetings, confirmations via WhatsApp.
 - The increment was developed between Oct 27 and Nov 8, 2026, later than planned (Oct 1–21); the delay was absorbed by moving the Sprint 2 delivery to Nov 22, 2026.
 - Tag: [sprint-1](https://github.com/aaortizdev/SE2-1-NovaInspections/releases/tag/sprint-1) (ad8cbe8, PR #3, Nov 14, 2026). Not deployed in Sprint 1; demonstrated locally.
-- Acceptance form: pending client signature.
+- Acceptance form: signed by the client on Nov 26, 2026 ([Carta_Aceptacion_Sprint1_signed.pdf](../../Communications/acceptance/Carta_Aceptacion_Sprint1_signed.pdf)).
 
 ## Backlog and status
 
