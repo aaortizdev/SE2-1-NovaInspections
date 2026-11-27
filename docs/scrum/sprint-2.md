@@ -16,7 +16,7 @@ The plan (Nov 15, 2026) distributes 39 tasks in 6 blocks, with code freeze on No
 - Deferred: US, MX, CO, UK and EU markets ("Coming soon"), database persistence, FE-8 PDF sharpness, label rotation and the second dataset evaluation (Sprint 3).
 - Rejected: US rules (AI-4), dropped on Nov 15.
 - Tag: [sprint-2](https://github.com/aaortizdev/SE2-1-NovaInspections/releases/tag/sprint-2) (742773f, PR #10, Nov 20, 2026).
-- Acceptance form: pending client signature.
+- Acceptance form: signed by the client on Nov 26, 2026 ([Carta_Aceptacion_Sprint2_signed.pdf](../../Communications/acceptance/Carta_Aceptacion_Sprint2_signed.pdf)).
 
 ## Backlog by block
 
